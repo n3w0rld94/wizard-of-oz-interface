@@ -1,0 +1,6 @@
+{
+    "editor.codeActionsOnSave": null,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/.venv/**/*"
+    ]
+}

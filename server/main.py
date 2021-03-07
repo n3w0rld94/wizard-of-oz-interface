@@ -1,9 +1,13 @@
-import threading
+import sys
+sys.path.insert(0, '..')
+
 from flask import Flask
 from flask import send_from_directory
 from werkzeug.routing import BaseConverter
 import webbrowser, random, atexit, os
 from threading import Timer
+
+from animus_sdk.example import Animus_Client
 
 apiBaseUrl = "/animus/"
 port = 5000 + random.randint(0, 999)
@@ -11,6 +15,7 @@ app = Flask(
     __name__, static_url_path="", static_folder="../client/dist/wizard-of-oz-interface"
 )
 
+animus_client = Animus_Client()
 
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
@@ -44,15 +49,15 @@ def open_browser():
 # Clean up any subscription, close any connection open and so on
 @atexit.register
 def clean_up():
+    animus_client.dispose_animus()
     print("cleaned up!!!")
 
 
 if __name__ == "__main__":
-    debug=False
-    
+    debug = False
+
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser()).start()
-    
+
     app.run(port=port, debug=debug)
-    

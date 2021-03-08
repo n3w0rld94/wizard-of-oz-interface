@@ -70,7 +70,8 @@ class Animus_Client:
             return get_robots_result.robots
 
 
-    # available_robots.robots[chosen_index]
+    # Parameter passed should looks like so: available_robots.robots[chosen_index]
+    ## TODO: Create Class for robot_details
     def choose_robot(self, robot_details) -> bool:
         if not robot_details:
             log.warn("No robot selected. please chose a robot and try again.")

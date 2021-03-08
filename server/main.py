@@ -7,7 +7,7 @@ from werkzeug.routing import BaseConverter
 import webbrowser, random, atexit, os
 from threading import Timer
 
-from animus_sdk.animus_wrapper import Animus_Client
+from animus.animus_wrapper import Animus_Client
 
 apiBaseUrl = "/animus/"
 port = 5000 + random.randint(0, 999)

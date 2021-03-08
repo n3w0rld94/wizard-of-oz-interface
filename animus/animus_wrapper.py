@@ -3,10 +3,10 @@
 # All Rights Reserved
 
 
-from .login_details import LoginDetails
+from .login_details import Animus_Login_Details
 from enum import Enum
-import animus_client as animus
-import animus_utils as utils
+import animus_sdk.animus_client.animus_client as animus
+import animus_sdk.animus_utils.animus_utils as utils
 import logging
 import numpy as np
 import random
@@ -21,8 +21,10 @@ log.info(animus.version())
 
 
 class Animus_Client:
+    """ A wrapper to the Animus client functionalities """
+
     def __init__(self):
-        self.robot = None
+        self.robot: animus.Robot
         self.setup()
 
     def setup(self):
@@ -39,66 +41,81 @@ class Animus_Client:
             return False
         self.setup_motor_dictionary()
 
-    def login(self):
-        login_result = animus.login_user(
-            LoginDetails.username, LoginDetails.password, False
-        )
+    def login(self, username: str, password: str) -> bool:
+        if not username or not password:
+            username = Animus_Login_Details.username
+            password = Animus_Login_Details.password
+        
+        login_result = animus.login_user(username, password, system_login=False)
         if login_result.success:
             log.info("Animus Client - Login Success")
             return True
         else:
-            log.info("Animus Client - Login Failed")
+            log.info("Animus Client - Login Failed. Reason: " + login_result.description)
             return False
 
-    def get_robots(self):
-        get_robots_result = animus.get_robots(True, True, False)
+    def get_robots(self, get_local: bool, get_remote: bool, get_system: bool) -> list:
+        get_robots_result = animus.get_robots(get_local, get_remote, get_system)
+        
         if not get_robots_result.localSearchError.success:
-            log.error(get_robots_result.localSearchError.description)
+            log.error("Local network search failed: " + get_robots_result.localSearchError.description)
 
         if not get_robots_result.remoteSearchError.success:
-            log.error(get_robots_result.remoteSearchError.description)
+            log.error("Remote search failed: " + get_robots_result.remoteSearchError.description)
 
         if len(get_robots_result.robots) == 0:
             log.info("Animus Client - No Robots found")
-            animus.close_client_interface()
             return []
         else:
             return get_robots_result.robots
 
-    def choose_robot(self, available_robots, chosen_index):
-        chosen_robot_details = available_robots.robots[chosen_index]
-        self.robot = animus.Robot(chosen_robot_details)
+
+    # available_robots.robots[chosen_index]
+    def choose_robot(self, robot_details) -> bool:
+        if not robot_details:
+            log.warn("No robot selected. please chose a robot and try again.")
+            return False
+
+        self.robot = animus.Robot(robot_details)
+
+        return True
 
     def connect_to_robot(self):
         if not self.is_robot_selected():
             return False
 
         robot_name = self.robot.robot_details.name
-        if not self.robot.connect().success:
-            print(f"Could not connect with robot {robot_name}")
-            animus.close_client_interface()
+        connection_result = self.robot.connect()
+
+        if not connection_result.success:
+            log.warn(f"Could not connect with robot {robot_name}. Reason: " + connection_result.description)
             return False
 
-        print(f"Animus Client - Successfully connected to robot {robot_name}")
+        log.info(f"Successfully connected to robot {robot_name}")
         return True
 
     def is_robot_selected(self):
         if not self.robot:
-            print("Animus Client - No robot selected. You must select a robot first.")
+            log.warn("No robot selected. You must select a robot first in order to perform this action.")
             return False
 
-    def open_modality(self, robot_modality):
+    def open_modality(self, modality_name):
+        """ #### Opens a modality channel
+            #### Args:
+                        `modality_name (str)`: The modality channel
+        """
+
         if not self.is_robot_selected():
             return False
 
         robot_name = self.robot.robot_details.name
-        if not self.robot.open_modality(robot_modality):
-            log.error(f"Could not open {robot_modality} modality on {robot_name}.")
+        open_modality_result = self.robot.open_modality(modality_name)
+
+        if not self.robot.open_modality(modality_name):
+            log.error(f"Could not open {modality_name} modality on {robot_name}. Reason: " + open_modality_result.description)
             return False
 
-        print(
-            f"Animus Client - Successfully opened {robot_modality} modality on {robot_name}"
-        )
+        log.info(f"Successfully opened {modality_name} modality on {robot_name}")
 
         return True
 
@@ -107,18 +124,19 @@ class Animus_Client:
 
         return True
 
-    def list_available_motions(self):
+    def list_available_motions(self) -> None:
         motion_dictionary = utils.get_motor_dict()
+        motion_list = list(motion_dictionary.keys)
 
-        log.info(motion_dictionary)
-        return True
+        log.info("------ List of built-in motions ---- ")
+        log.info(motion_list)
 
     def dispose_animus(self):
         if self.robot:
             self.robot.disconnect()
         animus.close_client_interface()
 
-    def demo_speech(self, message):
+    def demo_speech(self, message: str)-> bool:
         if not self.is_robot_selected():
             return False
 
@@ -138,7 +156,7 @@ class Animus_Client:
 
         return True
 
-    def setup_motor_dictionary(self):
+    def setup_motor_dictionary(self) -> list:
         motorDict = utils.get_motor_dict()
         list_of_motions = [motorDict.copy()]
         motorDict["head_left_right"] = 2 * utils.HEAD_RIGHT
@@ -153,7 +171,9 @@ class Animus_Client:
 
         return list_of_motions
 
-    def demo_motion(self, log):
+    def demo_motion(self) -> None:
+        """ #### Opens a video player showing the robot video feed and moves the head of the robot in 4 random directions and stops. """ 
+
         num_of_received_images = 0
         next_motion_index = 0
 

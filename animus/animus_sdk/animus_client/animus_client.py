@@ -4,9 +4,9 @@
 # Author: Daniel Camilleri <daniel@cyberselves.com>
 
 from typing import Any, Tuple
-from lib_client import animus_client_py3 as animus_client
-import animus_utils as utils
-import json
+from ..lib_client import animus_client_py3 as animus_client
+from ...models.i_audio_params import Animus_Audio_Params
+from ..animus_utils import animus_utils as utils
 import logging
 import numpy as np
 from ...models.i_animus_response import Animus_Response, Animus_Robot_Search_Response
@@ -19,27 +19,20 @@ _sdk_version = "v2.0.6"
 _sdk_build = "529"
 _sdk_build_date = "2021-02-05-22:31:48-UTC"
 
-# Setup default audio parameters for the inbuilt audio player
-# Backends = ["alsa", "wasapi", "dsound", "winmm", "pulse", "jack", "coreaudio",
-#                   "sndio", "audio4", "oss", "opensl", "openal", "sdl"]
-# SampleRate
-# Channels
-# packets transmitted per second
-# sizeinframes - leave true
 
-
-# returns the version of the animus client and animus core libraries
 def version():
+    """ #### Returns the version of the animus client and animus core libraries"""
+
     version_string = animus_client.VersionGo()    
     log.info(version_string)
     return version_string
 
 
-def setup(audio_params: dict, logdir: str, loglatency: bool)-> Animus_Response:
-    """Sets required arguments for the animus client
+def setup(audio_params: Animus_Audio_Params, logdir: str, loglatency: bool)-> Animus_Response:
+    """ #### Sets required arguments for the animus client
 
-    Args:
-        audio_params (utils.AudioParams): The parameters for audio transmission / reception. If None passed, default parameters are used: 
+        #### Args:
+                `audio_params (utils.AudioParams)`: The parameters for audio transmission / reception. If None passed, default parameters are used: 
                                             backends: [""], 
                                             sampleRate: 16000, 
                                             Channels: 1, 

@@ -1,17 +1,2 @@
-<form #form="ngForm">
-  <div>
-    <p>User Name</p>
-    <input type="password" name="username" required ngModel>
-
-  </div>
-  <div>
-    <p>User Name</p>
-    <input type="password" name="password" required ngModel>
-  </div>
-
-  <button (click)="onSubmit($event)" [disabled]="!form.form.valid">
-    Log In
-  </button>
-</form>
-
+<app-navigation></app-navigation>
 <router-outlet></router-outlet>

@@ -13,8 +13,9 @@ from animus.animus_wrapper.animus_wrapper import Animus_Client
 
 apiBaseUrl = "/animus/"
 port = 5000 + random.randint(0, 999)
+app_folder = "./client/dist/wizard-of-oz-interface"
 app = Flask(
-    __name__, static_url_path="", static_folder="../client/dist/wizard-of-oz-interface"
+    __name__, static_url_path="", static_folder=app_folder
 )
 
 animus_client = Animus_Client()
@@ -31,12 +32,12 @@ app.url_map.converters["regex"] = RegexConverter
 
 @app.route("/")
 def angular():
-    return send_from_directory("../client/dist/wizard-of-oz-interface", "index.html")
+    return send_from_directory(app_folder, "index.html")
 
 
 @app.route("/<regex('\w\.(js|css)'):path>")
 def angular_src(path):
-    return send_from_directory("../client/dist/wizard-of-oz-interface", path)
+    return send_from_directory(app_folder, path)
 
 
 @app.route(apiBaseUrl + "connect")

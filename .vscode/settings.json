@@ -3,7 +3,8 @@
     "python.analysis.extraPaths": [
         "${workspaceFolder}/.venv/**/*",
         "${workspaceFolder}",
-        "${workspaceFolder}/animus"
+        "${workspaceFolder}/animus",
+        "${workspaceFolder}/animus/animus_sdk"
     ],
 
     "python.formatting.provider": "black",

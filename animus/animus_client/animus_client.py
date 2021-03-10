@@ -4,12 +4,12 @@
 # Author: Daniel Camilleri <daniel@cyberselves.com>
 
 from typing import Any, Tuple
-from ..lib_client import animus_client_py3 as animus_client
-from ...models.i_audio_params import Animus_Audio_Params
-from ..animus_utils import animus_utils as utils
+from lib_client import animus_client_py3 as animus_client
+from animus_utils import animus_utils as utils
+from models.i_audio_params import Animus_Audio_Params
+from models.i_animus_response import Animus_Response, Animus_Robot_Search_Response
 import logging
 import numpy as np
-from ...models.i_animus_response import Animus_Response, Animus_Robot_Search_Response
 
 log = utils.create_logger("AnimusClient", logging.INFO)
 _animus_client_version = "v2.1.0"

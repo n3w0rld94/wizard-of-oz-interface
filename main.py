@@ -1,13 +1,15 @@
 import sys
-sys.path.insert(0, '..')
 
-from flask import Flask
-from flask import send_from_directory
+sys.path.insert(0, "..")
+
+from flask import Flask, send_from_directory, request, Response
+import json
 from werkzeug.routing import BaseConverter
 import webbrowser, random, atexit, os
 from threading import Timer
 
-from animus.animus_wrapper import Animus_Client
+from animus.animus_wrapper.animus_wrapper import Animus_Client
+
 
 apiBaseUrl = "/animus/"
 port = 5000 + random.randint(0, 999)
@@ -16,6 +18,7 @@ app = Flask(
 )
 
 animus_client = Animus_Client()
+
 
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
@@ -41,6 +44,23 @@ def hello():
     return "Hello World!"
 
 
+@app.route(apiBaseUrl + "login")
+def login(path):
+    username = request.args.get("username")
+    password = request.args.get("password")
+
+    login_outcome = animus_client.login(username, password)
+
+    json_response = json.dumps(login_outcome)
+    login_response = Response(
+        json_response, content_type="application/json; charset=utf-8"
+    )
+    login_response.headers.add("content-length", len(json_response))
+    login_response.status_code = 200
+
+    return login_response
+
+
 # opens a web browser at the right address
 def open_browser():
     webbrowser.open("http://127.0.0.1:" + str(port) + "/")
@@ -61,3 +81,7 @@ if __name__ == "__main__":
         Timer(0.5, lambda: open_browser()).start()
 
     app.run(port=port, debug=debug)
+
+if __name__ == '__main__' and __package__ is None:
+    from os import sys, path
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))

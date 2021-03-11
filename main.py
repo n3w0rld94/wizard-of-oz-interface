@@ -20,7 +20,6 @@ app = Flask(
 
 animus_client = Animus_Client()
 
-
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
         super(RegexConverter, self).__init__(url_map)
@@ -41,7 +40,7 @@ def angular_src(path):
 
 
 @app.route(apiBaseUrl + "connect")
-def hello():
+def connect():
     return "Hello World!"
 
 

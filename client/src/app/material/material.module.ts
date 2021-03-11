@@ -9,6 +9,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 
 const materialModules = [
@@ -21,7 +25,11 @@ const materialModules = [
     MatFormFieldModule,
     MatCardModule,
     MatMenuModule,
-    MatInputModule
+    MatInputModule,
+    MatListModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatGridListModule
 ];
 
 @NgModule({

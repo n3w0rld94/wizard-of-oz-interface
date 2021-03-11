@@ -1,0 +1,67 @@
+<mat-grid-list id="full-screen" cols="4" rows="4" rowHeight="2:1">
+    <mat-grid-tile id="video-player" [colspan]=3 [rowspan]=3>
+        <b>Video Stream</b>
+
+        <img class="video-feed" *ngIf="isConnected"
+            src="https://adamapp.co.uk/assets/img/products/pepper/pepper-front-426w.png?202001">
+    </mat-grid-tile>
+    <mat-grid-tile class="script-menu" id="control-panel" [rowspan]=3>
+        <mat-tab-group animationDuration="0ms">
+            <mat-tab label="Action Panel">
+
+                <mat-action-list>
+                    <div style="margin-bottom: 50px;">
+                        <b>Control Panel</b>
+                    </div>
+                    <button (click)="isConnected=!isConnected" class="mat-raised-button margin-bottom" mat-list-item>
+                        {{isConnected? "Disconnect" : "Connect to " + robotName}}
+                    </button>
+                    <ng-container *ngIf="isConnected">
+                        <button class="mat-raised-button margin-bottom" mat-list-item>
+                            Activate Gaze Control
+                        </button>
+                        <button class="mat-raised-button margin-bottom" mat-list-item>
+                            Start Routine
+                        </button>
+                        <button class="mat-raised-button margin-bottom" mat-list-item>
+                            Stop
+                        </button>
+                    </ng-container>
+                </mat-action-list>
+            </mat-tab>
+            <mat-tab label="Status Panel">
+                <mat-list>
+                    <h2>Connection</h2>
+                    <mat-list-item>
+                        <p mat-line> <b>Connection:</b> Stable </p>
+                    </mat-list-item>
+
+                    <mat-divider></mat-divider>
+                    <h2>Active Modalities</h2>
+
+                    <mat-list-item style="overflow: hidden;">
+                        <div style="font-size: large;" mat-line>
+                            <mat-icon style=" color: green;">check_circle</mat-icon>
+                            Video
+                        </div>
+                        <div style="font-size: large;" mat-line>
+                            <mat-icon style=" color: green;">check_circle</mat-icon>
+                            Audio Input
+                        </div>
+                        <div style="font-size: large;" mat-line>
+                            <mat-icon style=" color: green;">check_circle</mat-icon>
+                            Motor
+                        </div>
+                    </mat-list-item>
+                </mat-list>
+            </mat-tab>
+        </mat-tab-group>
+
+    </mat-grid-tile>
+    <mat-grid-tile id="chat" [colspan]=4>
+        <mat-form-field style="width: 50%">
+            <mat-label>Text/Speech Interface</mat-label>
+            <textarea matInput></textarea>
+        </mat-form-field>
+    </mat-grid-tile>
+</mat-grid-list>

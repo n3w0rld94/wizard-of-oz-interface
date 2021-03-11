@@ -4,18 +4,19 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models.i_animus_response import Animus_Response
 from models.i_login_details import Animus_Login_Details
-from animus_client import animus_client as animus
+from animus.animus_client import animus_client as animus
 import animus_utils.animus_utils as utils
 import logging
-import numpy as np
 import random
 import cv2
-import time
 from models.modalities import Robot_Modality
+
+class Animus_Client:
+    a = None
 
 stopFlag = False
 

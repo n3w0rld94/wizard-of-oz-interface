@@ -6,7 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./navigation.component.css']
 })
 export class NavigationComponent implements OnInit {
-  title = 'Tic Tac Toe';
+  title = 'Cloud Wizard Of Oz';
   isAuthenticated: boolean;
 
   constructor() { }

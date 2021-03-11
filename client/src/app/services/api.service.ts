@@ -8,7 +8,7 @@ import { retry, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  baseApiUrl = '/api';
+  baseApiUrl = '/animus';
 
   constructor(private httpClient: HttpClient) { }
 

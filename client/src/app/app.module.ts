@@ -8,13 +8,17 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './pages/login/login.component';
 import { MaterialModule } from './material/material.module';
 import { NavigationComponent } from './navigation/navigation.component';
+import { ProjectManagerComponent } from './pages/project-manager/project-manager.component';
+import { ProjectControlComponent } from './pages/project-control/project-control.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    NavigationComponent
+    NavigationComponent,
+    ProjectManagerComponent,
+    ProjectControlComponent
   ],
   imports: [
     HttpClientModule,

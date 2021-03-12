@@ -11,6 +11,7 @@ import { RobotService } from 'src/app/services/robot.service';
 })
 export class ProjectDialogComponent implements OnInit {
   form: FormGroup;
+  availableRobots: any[] = [];
 
   constructor(
     private formBuilder: FormBuilder,

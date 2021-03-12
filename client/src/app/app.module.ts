@@ -10,7 +10,8 @@ import { MaterialModule } from './material/material.module';
 import { NavigationComponent } from './navigation/navigation.component';
 import { ProjectManagerComponent } from './pages/project-manager/project-manager.component';
 import { ProjectControlComponent } from './pages/project-control/project-control.component';
-
+import { ToastrModule } from 'ngx-toastr';
+import { ProjectDialogComponent } from './pages/project-dialog/project-dialog.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { ProjectControlComponent } from './pages/project-control/project-control
     LoginComponent,
     NavigationComponent,
     ProjectManagerComponent,
-    ProjectControlComponent
+    ProjectControlComponent,
+    ProjectDialogComponent
   ],
   imports: [
     HttpClientModule,
@@ -26,6 +28,7 @@ import { ProjectControlComponent } from './pages/project-control/project-control
     AppRoutingModule,
     FormsModule,
     BrowserAnimationsModule,
+    ToastrModule.forRoot(),
     MaterialModule,
     FormsModule,
     ReactiveFormsModule

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ApiService } from 'src/app/services/api.service';
+import { ToastrService } from 'ngx-toastr';
+import { IAnimusResponse } from 'src/app/models/i-animus-response';
+import { AuthenticationService } from 'src/app/services/authentication.service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +15,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private apiService: ApiService
+    private authService: AuthenticationService,
+    private toasterService: ToastrService
   ) { }
 
   async ngOnInit() {
@@ -25,12 +28,20 @@ export class LoginComponent implements OnInit {
 
   async login() {
     const formValue = this.form.getRawValue();
-    const result = this.apiService.login(formValue.username, formValue.password);
-
-    console.log('Login Result', result);
-  }
-
-  onSubmit() {
-    return null;
+    this.authService.login(formValue.username, formValue.password).subscribe({
+      next: (result: IAnimusResponse) => {
+        if (result.success) {
+          this.loginInvalid = false;
+          this.toasterService.success(result.description, 'Login succeeded');
+        } else {
+          this.loginInvalid = true;
+          this.toasterService.error(result.description, 'Login Failed');
+        }
+      },
+      error: (err: any) => {
+        console.error('Error Loggin in', err);
+        this.toasterService.error(JSON.stringify(err), 'Error Loggin in');
+      }
+    });
   }
 }

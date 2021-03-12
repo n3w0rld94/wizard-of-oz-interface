@@ -1,7 +1,10 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { IProject } from 'src/app/models/i-project';
+import { ProjectDialogComponent } from '../project-dialog/project-dialog.component';
 
 @Component({
   selector: 'app-project-manager',
@@ -9,13 +12,13 @@ import { MatTableDataSource } from '@angular/material/table';
   styleUrls: ['./project-manager.component.css']
 })
 export class ProjectManagerComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['openProject', 'name', 'description', 'robot'];
+  displayedColumns: string[] = ['openProject', 'name', 'description', 'robot', 'edit'];
   dataSource: MatTableDataSource<any>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor() { }
+  constructor(private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource([
@@ -35,6 +38,28 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  openDialog(project: IProject | null): void {
+    const data = project || {
+      title: '',
+      description: '',
+      robot: ''
+    };
+    const dialogRef = this.dialog.open(ProjectDialogComponent, {
+      width: '250px',
+      data
+    });
+
+    dialogRef.afterClosed().subscribe({
+      next: result => {
+        console.log('The dialog was closed', result);
+
+        if (result) {
+          this.dataSource.data = [...this.dataSource.data, result];
+        }
+      }
+    });
   }
 
   applyFilter(event: Event) {

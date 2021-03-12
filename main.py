@@ -75,7 +75,7 @@ def get_robots():
         return get_response(False, "User not logged in", -1)
     else:
         robots = user.get_available_robots()
-        return get_response(True, "success", 1, robots.__dict__)
+        return get_response(True, "success", 1, robots)
 
 
 @app.route(apiBaseUrl + "check-authenticated")

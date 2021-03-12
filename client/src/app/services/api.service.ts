@@ -1,34 +1,42 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ObservableInput, throwError } from 'rxjs';
+import { Observable, ObservableInput, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 
-import { retry, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  baseApiUrl = '/animus';
+  baseApiUrl = '/animus/';
 
   constructor(private httpClient: HttpClient) { }
 
-  login(username: string, password: string): boolean {
+  get(url: string, parameters?: Record<string, any>): Observable<any> {
+    console.log('parameters', parameters);
+    const options = this.getApiGetOptions(parameters);
 
-    const params = new HttpParams()
-      .set('username', username)
-      .set('password', password);
+    return this.httpClient.get<any>(this.baseApiUrl + url, options).pipe(
+      retry(1),
+      catchError(this.processError)
+    );
+  }
 
-    try {
-      this.httpClient.get<any>(this.baseApiUrl + '/login', { params })
-        .pipe(
-          retry(1),
-          catchError(this.processError)
-        );
-    } catch (ex) {
-      console.log('Error attempting to log in', ex);
+  private getApiGetOptions(parameters?: Record<string, any>): any {
+    let params;
+    let options;
+
+    if (parameters) {
+      params = new HttpParams();
+
+      for (const key of Object.keys(parameters)) {
+        params = params.set(key, parameters[key]);
+      }
+
+      options = { params };
     }
 
-    return true;
+    return options;
   }
 
   processError(err: any): ObservableInput<any> {

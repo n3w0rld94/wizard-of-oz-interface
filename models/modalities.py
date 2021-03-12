@@ -1,4 +1,4 @@
-import Enum
+from enum import Enum
 
 class Robot_Modality(Enum):
     VISION = "vision"

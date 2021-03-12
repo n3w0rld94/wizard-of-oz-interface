@@ -1,0 +1,25 @@
+<div mat-dialog-content>
+    <form [formGroup]="form">
+        <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description">
+        </mat-form-field>
+        <mat-divider></mat-divider>
+        <button mat-raised-button (click)="searchRobots()">
+            Search Robots...
+        </button>
+        <mat-divider></mat-divider>
+        <mat-form-field>
+            <mat-label>Robot</mat-label>
+            <input matInput formControlName="robot">
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button [disabled]="this.form.invalid" mat-button [mat-dialog-close]="onClose()" cdkFocusInitial>Save</button>
+</div>

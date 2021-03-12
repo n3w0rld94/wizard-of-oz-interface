@@ -8,8 +8,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from models.i_animus_response import Animus_Response
 from models.i_login_details import Animus_Login_Details
-from animus.animus_client import animus_client as animus
-import animus_utils.animus_utils as utils
+import animus_client as animus
+import animus_utils as utils
 import logging
 import random
 import cv2
@@ -20,6 +20,7 @@ class Animus_Client:
 
 stopFlag = False
 
+
 log = utils.create_logger("MyAnimusApp", logging.INFO)
 log.info(animus.version())
 
@@ -27,7 +28,7 @@ log.info(animus.version())
 class Animus_Client:
     """ A wrapper to the Animus client functionalities """
 
-    def __init__(self, robot: animus.Robot) -> animus.Robot:
+    def __init__(self, robot: animus.Robot = None) -> animus.Robot:
         self.robot = robot
         self.setup()
 

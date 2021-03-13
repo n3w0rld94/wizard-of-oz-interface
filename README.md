@@ -1,27 +1,27 @@
-Sample Flask with Angular web app
+# Wizard of Oz
 ====
 
-Sample Flask with Angular web app.
+Wizard of Oz with Animus SDK and Angular web app.
 
 ### App Structure
 ```
 /
-├── LICENSE.md
 ├── README.md
 ├── requirements.txt
-└── sample-flask-angular # Flask project folder
-    ├── Web App # Angular project folder
-    │   ├── dist (compiled version automatically goes here)
-    │   ├── e2e (ignore)
-    │   ├── karma.conf.js (ignore)
-    │   ├── node_modules (all installed packages files)
-    │   ├── package.json (list of installed packages)
-    │   ├── protractor.conf.js (ignore)
-    │   ├── README.md
-    │   ├── src (source code is here)
-    │   ├── tsconfig.json (ignore)
-    │   └── tslint.json (ignore)
-    └── main.py
+├── main.py # Flask server (starts a server and launches the client app on a new web page)
+├── animus_wrapper # Animus class wrapping Animus SDK functionality (one per user)
+├── models # Path to classes and interfaces.
+└── client # Angular project folder
+    ├── dist (compiled version automatically goes here)
+    ├── e2e (ignore)
+    ├── karma.conf.js (ignore)
+    ├── node_modules (all installed packages files)
+    ├── package.json (list of installed packages)
+    ├── protractor.conf.js (ignore)
+    ├── README.md
+    ├── src (source code is here)
+    ├── tsconfig.json (ignore)
+    └── tslint.json (ignore)
 ```
 
 Requirements
@@ -30,7 +30,6 @@ Requirements
 Install the following requisites:
 
 - Python3
-- Virtualenv
 - NodeJs
 - Angular-cli
 
@@ -38,20 +37,16 @@ Install the following requisites:
 Installation
 ----
 
-Create virtual enviroment folder and load:
-```sh
-$ virtualenv -p python3 .venv
-$ source .venv/bin/activate
-```
-
 Install python dependencies:
 ```sh
-(.venv) $ pip install -r requirements.txt
+pip3 install flask
+cd path/to/animus
+pip3 install .
 ```
 
 Install angular dependencies:
 ```sh
-$ cd sample-flask-angular/angular
+$ cd client
 $ npm install
 ```
 
@@ -59,19 +54,14 @@ $ npm install
 Deployment
 ----
 
-First build production application of Angular with Angular-cli:
+Build Angular app with Angular-cli after every change:
 
 ```sh
-$ cd sample-flask-angular
+$ cd client
 $ ng build --prod
 ```
 
-Start server:
+Start Flask server:
 ```sh
-$ source .venv/bin/activate
-(.venv) $ python sample-flask-angular/main.py
+python main.py
 ```
-
-Routes
-----
-- `/`: Index route will serve angular application.

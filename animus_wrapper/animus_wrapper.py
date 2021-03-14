@@ -3,8 +3,8 @@
 
 import os
 import sys
+from typing import List, Tuple
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from models.i_animus_response import Animus_Response
 from models.i_login_details import Animus_Login_Details
@@ -51,12 +51,17 @@ class Animus_Client:
             return False
         self.setup_motor_dictionary()
 
+        # Keeps track of open_modalities
+        setattr(animus.Robot, "open_modalities", {})
+
     def login(self, username: str, password: str) -> Animus_Response:
         if not username or not password:
             username = Animus_Login_Details.username
             password = Animus_Login_Details.password
 
-        login_result = animus.login_user(username, password, system_login=False)
+        login_result = animus.login_user(
+            username, password, system_login=False
+        )  # use user and psw provided, System Login if SysTray software installed (not our case)
         if login_result.success:
             log.info("Animus Client - Login Success")
             return login_result
@@ -66,10 +71,14 @@ class Animus_Client:
             )
             return login_result
 
-    def get_robots(self, get_local: bool, get_remote: bool, get_system: bool) -> list:
+    def get_robots(
+        self, get_local: bool, get_remote: bool, get_system: bool
+    ) -> Tuple[list, List[Animus_Response]]:
         get_robots_result = animus.get_robots(get_local, get_remote, get_system)
+        errors = []
 
         if not get_robots_result.localSearchError.success:
+            errors.append(get_robots_result.localSearchError)
             log.error(
                 "Local network search failed: "
                 + get_robots_result.localSearchError.description
@@ -85,7 +94,7 @@ class Animus_Client:
             log.info("Animus Client - No Robots found")
             return []
         else:
-            return get_robots_result.robots
+            return get_robots_result.robots, errors
 
     # Parameter passed should looks like so: available_robots.robots[chosen_index]
     ## TODO: Create Class for robot_details
@@ -130,6 +139,8 @@ class Animus_Client:
 
         if not self.is_robot_selected():
             return False
+        if self.robot.open_modalities.get(modality_name):
+            return True
 
         robot_name = self.robot.robot_details.name
         open_modality_result = self.robot.open_modality(modality_name)
@@ -141,8 +152,32 @@ class Animus_Client:
             )
             return False
 
+        self.robot.open_modalities.set(modality_name, True)
         log.info(f"Successfully opened {modality_name} modality on {robot_name}")
 
+        return True
+
+    def close_modality(self, modality_name):
+        """#### Opens a modality channel
+        #### Args:
+                    `modality_name (str)`: The modality channel
+        """
+
+        if not self.is_robot_selected():
+            return False
+        if not self.robot.open_modalities.get(modality_name):
+            return True
+
+        robot_name = self.robot.robot_details.name
+        close_modality_result = self.robot.close_modality(modality_name)
+        if not self.robot.open_modality(modality_name):
+            log.error(
+                f"Could not open {modality_name} modality on {robot_name}. Reason: "
+                + close_modality_result.description
+            )
+            return False
+
+        self.robot.open_modalities.set(modality_name, False)
         return True
 
     def list_available_emotions(self):
@@ -185,17 +220,61 @@ class Animus_Client:
     def setup_motor_dictionary(self) -> list:
         motorDict = utils.get_motor_dict()
         list_of_motions = [motorDict.copy()]
-        motorDict["head_left_right"] = 2 * utils.HEAD_RIGHT
-        motorDict["head_up_down"] = 2 * utils.HEAD_UP
+        motorDict["head_left_right"] = 20 * utils.HEAD_RIGHT
+        motorDict["head_up_down"] = 20 * utils.HEAD_UP
         motorDict["head_roll"] = 0.0
         motorDict["body_forward"] = 0.0
         motorDict["body_sideways"] = 0.0
         motorDict["body_rotate"] = 0.0
-        motorDict["head_left_right"] = 2 * utils.HEAD_LEFT
-        motorDict["head_up_down"] = 2 * utils.HEAD_DOWN
+        motorDict["head_left_right"] = 20 * utils.HEAD_LEFT
+        motorDict["head_up_down"] = 20 * utils.HEAD_DOWN
         list_of_motions.append(motorDict.copy())
 
         return list_of_motions
+
+    def move_robot_body(self, forward_backward: int, left_right: int, rotate: int):
+        if not self.is_robot_selected():
+            return False
+        if not self.open_modality(Robot_Modality.MOTOR):
+            return False
+
+        forward_backward = forward_backward if forward_backward else 0
+        left_right = left_right if left_right else 0
+        rotate = rotate if rotate else 0
+        motorDict = utils.get_motor_dict()
+        motorDict["body_forward"] = 10.0 * forward_backward
+        motorDict["body_sideways"] = 10.0 * left_right
+        motorDict["body_rotate"] = 10.0 * rotate
+
+        self.robot.set_modality(
+            Robot_Modality.MOTOR,
+            list(motorDict.values()),
+        )
+
+    def move_robot_head(self, left_right: int, up_down: int, roll: int):
+        if not self.is_robot_selected():
+            return False
+        if not self.open_modality(Robot_Modality.MOTOR):
+            return False
+
+        left_right = left_right if left_right else 0
+        up_down = up_down if up_down else 0
+        roll = roll if roll else 0
+        motorDict = utils.get_motor_dict()
+        motorDict["head_left_right"] = 20 * left_right
+        motorDict["head_up_down"] = 20 * up_down
+        motorDict["head_roll"] = 5 * roll
+
+        self.robot.set_modality(
+            Robot_Modality.MOTOR,
+            list(motorDict.values()),
+        )
+
+    def start_video_stream(): 
+        def generate():
+            for i in range(100):
+                yield str(i)
+        return generate
 
     def demo_motion(self) -> None:
         """ #### Opens a video player showing the robot video feed and moves the head of the robot in 4 random directions and stops. """

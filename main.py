@@ -1,22 +1,41 @@
-import sys
-
-sys.path.insert(0, "..")
 import atexit
 import json
 import random
 import webbrowser
 from threading import Timer
+import subprocess
 
 from flask import Flask, Response, request, send_from_directory
+from flask_socketio import SocketIO, emit
+
 from werkzeug.routing import BaseConverter
 
 from models.user_status import Animus_User
 
 apiBaseUrl = "/animus/"
-port = 5000 + random.randint(0, 999)
 app_folder = "./client/dist/wizard-of-oz-interface"
+
 app = Flask(__name__, static_url_path="", static_folder=app_folder)
+socketio = SocketIO(app, logger=True, engineio_logger=True)
 user_by_email = {}
+
+
+def build_anguar():
+    cmds = ["cd client", "ng build"]
+    encoding = "latin1"
+    p = subprocess.Popen(
+        "cmd.exe", stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    for cmd in cmds:
+        p.stdin.write((cmd + "\n").encode(encoding))
+    p.stdin.close()
+    p.wait()
+
+
+def writeClientConfig(port):
+    with open("./client/src/environments/config.json", "w") as json_file:
+        data = {"webSocketPort": port}
+        json.dump(data, json_file)
 
 
 class RegexConverter(BaseConverter):
@@ -52,6 +71,19 @@ def get_response(success, description, code, payload=None):
     return resp
 
 
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers["Cache-Control"] = "public, max-age=0"
+    return r
+
+
 @app.route("/")
 def angular():
     return send_from_directory(app_folder, "index.html")
@@ -74,8 +106,8 @@ def get_robots():
     if not user:
         return get_response(False, "User not logged in", -1)
     else:
-        robots = user.get_available_robots()
-        return get_response(True, "success", 1, robots)
+        robots, errors = user.get_available_robots()
+        return get_response(True, "success", 1, {robots: robots, errors: errors})
 
 
 @app.route(apiBaseUrl + "check-authenticated")
@@ -83,7 +115,7 @@ def check_authenticated():
     user = get_user_from_cookie()
     code = 1 if user != None else -1
 
-    resp = get_response(user != None, "User Authenticated", code)
+    resp = get_response(True, "User Authenticated", code)
     return resp
 
 
@@ -122,8 +154,21 @@ def logout():
     return get_response(True, "User logged out successfully", 1)
 
 
+@socketio.on("connect")
+def on_connect():
+    print("received connect")
+    emit("log", "Connected", broadcast=True)
+
+
+@socketio.on("message")
+def on_message_received(msg):
+    print("received message" + msg)
+    for i in range(100):
+        emit('message', i, broadcast=True)
+
+
 # opens a web browser at the right address
-def open_browser():
+def open_browser(port):
     webbrowser.open("http://127.0.0.1:" + str(port) + "/")
 
 
@@ -138,14 +183,12 @@ def clean_up():
 
 if __name__ == "__main__":
     debug = False
+    port = 5000 + random.randint(0, 999)
 
+    writeClientConfig(port)
+    build_anguar() # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
-        Timer(0.5, lambda: open_browser()).start()
+        Timer(0.5, lambda: open_browser(port)).start()
 
-    app.run(port=port, debug=debug)
-
-if __name__ == "__main__" and __package__ is None:
-    from os import path, sys
-
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    socketio.run(app, port=port)

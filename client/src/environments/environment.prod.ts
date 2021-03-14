@@ -1,3 +1,6 @@
+import config from './config.json';
+
 export const environment = {
-  production: true
+  production: true,
+  webSocketPort: config.webSocketPort
 };

@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ControlService } from 'src/app/services/control.service';
 
 @Component({
   selector: 'app-project-control',
@@ -9,10 +10,13 @@ export class ProjectControlComponent implements OnInit {
   @Input() robotName = 'Pepper';
   isConnected = false;
 
-
-  constructor() { }
+    constructor(private controlService: ControlService) { }
 
   ngOnInit(): void {
   }
 
+    onStartVideoStream() {
+        console.log('called startVideoStream');
+        this.controlService.startVideoStream();
+    }
 }

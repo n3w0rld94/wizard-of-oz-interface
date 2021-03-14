@@ -1,15 +1,21 @@
-<mat-grid-list id="full-screen" cols="4" rows="4" rowHeight="2:1">
-    <mat-grid-tile id="video-player" [colspan]=3 [rowspan]=3>
-        <button mat-button> Stop Video Stream</button>
-        <b>Video Stream</b>
+<mat-grid-list id="full-screen" cols="4" rows="5" rowHeight="2:1">
+    <mat-grid-tile>
+        <div title="Video control bar" [ngClass]="{disabled: !isConnected}" id="video-controls">
+            <button [disabled]="videoSrc" mat-raised-button (click)="onStartVideoStream()">
+                <mat-icon title="start video stream" role="button">live_tv</mat-icon>
+            </button>
+            <button [disabled]="!videoSrc" mat-raised-button (click)="onStopVideoStreaming()">
+                <mat-icon title="stop robot video stream" role="button">tv_off</mat-icon>
+            </button>
+        </div>
+    </mat-grid-tile>
+    <mat-grid-tile id="video-player" [rowspan]=3>
 
-        <img class="video-feed" *ngIf="isConnected"
-            src="https://adamapp.co.uk/assets/img/products/pepper/pepper-front-426w.png?202001">
+        <img class="video-feed" *ngIf="isConnected && videoSrc" [src]="videoSrc">
     </mat-grid-tile>
     <mat-grid-tile class="script-menu" id="control-panel" [rowspan]=3>
         <mat-tab-group animationDuration="0ms">
             <mat-tab label="Action Panel">
-
                 <mat-action-list>
                     <div style="margin-bottom: 50px;">
                         <b>Control Panel</b>

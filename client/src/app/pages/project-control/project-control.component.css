@@ -1,5 +1,5 @@
 #video-player {
-    background: lightblue;
+    background: black;
 }
 
 #chat {
@@ -15,10 +15,16 @@
 }
 
 .video-feed {
-    width: 213px;
-    height: 543px;
+    width: 100%;
+    height: auto;
 }
 
 .script-menu>::ng-deep .mat-figure {
-    align-items:flex-start;
+    align-items: flex-start;
+}
+
+#video-controls.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    /* background: #CCC; */
 }

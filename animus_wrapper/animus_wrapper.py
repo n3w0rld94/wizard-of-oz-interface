@@ -4,6 +4,7 @@
 import os
 import sys
 from typing import List, Tuple
+from woz_utils.video_reader import Video_Reader
 
 
 from models.i_animus_response import Animus_Response
@@ -271,10 +272,9 @@ class Animus_Client:
         )
 
     def start_video_stream(): 
-        def generate():
-            for i in range(100):
-                yield str(i)
-        return generate
+        video_streamer = Video_Reader()
+
+        yield video_streamer.start_capture()
 
     def demo_motion(self) -> None:
         """ #### Opens a video player showing the robot video feed and moves the head of the robot in 4 random directions and stops. """

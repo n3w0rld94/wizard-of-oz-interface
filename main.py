@@ -4,9 +4,13 @@ import random
 import webbrowser
 from threading import Timer
 import subprocess
+from woz_utils.video_reader import Video_Reader
 
 from flask import Flask, Response, request, send_from_directory
 from flask_socketio import SocketIO, emit
+import eventlet
+
+eventlet.monkey_patch()
 
 from werkzeug.routing import BaseConverter
 
@@ -18,6 +22,8 @@ app_folder = "./client/dist/wizard-of-oz-interface"
 app = Flask(__name__, static_url_path="", static_folder=app_folder)
 socketio = SocketIO(app, logger=True, engineio_logger=True)
 user_by_email = {}
+user_email_by_session_id = {}
+video_streamer = None
 
 
 def build_anguar():
@@ -83,6 +89,9 @@ def add_header(r):
     r.headers["Cache-Control"] = "public, max-age=0"
     return r
 
+@app.errorhandler(404)
+def handle_angular_routes(e):
+	return send_from_directory(app_folder, "index.html")
 
 @app.route("/")
 def angular():
@@ -115,7 +124,7 @@ def check_authenticated():
     user = get_user_from_cookie()
     code = 1 if user != None else -1
 
-    resp = get_response(True, "User Authenticated", code)
+    resp = get_response(True, "User Authenticated", 1)
     return resp
 
 
@@ -154,17 +163,45 @@ def logout():
     return get_response(True, "User logged out successfully", 1)
 
 
+@app.route(apiBaseUrl + "start_video_feed")
+def start_video_feed():
+    global video_streamer
+    video_streamer = Video_Reader()
+    video_streamer.capture = True
+    return Response(
+        video_streamer.start_capture(),
+        mimetype="multipart/x-mixed-replace; boundary=frame",
+    )
+
+
+@app.route(apiBaseUrl + "stop_video_feed")
+def stop_video_feed():
+    global video_streamer
+
+    if video_streamer:
+        video_streamer.capture = False
+
+    resp = get_response(True, "Video Feed Stopped", 1)
+
+    return resp
+
+
 @socketio.on("connect")
-def on_connect():
-    print("received connect")
+def on_connect(data):
+    print("received connect for " + request.sid)
+    print("received connect for " + data.username)
+    # user_email_by_session_id.set(request.sid, data.username)
     emit("log", "Connected", broadcast=True)
 
 
 @socketio.on("message")
 def on_message_received(msg):
     print("received message" + msg)
-    for i in range(100):
-        emit('message', i, broadcast=True)
+    # username = user_email_by_session_id.get(request.sid)
+    # user_by_email.get(username)
+
+    # if user:
+    #     user.animus_wrapper.start_video_stream()
 
 
 # opens a web browser at the right address
@@ -186,7 +223,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    build_anguar() # Build the client before serving it
+    build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

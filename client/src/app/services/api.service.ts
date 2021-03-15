@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { AnimusBaseServerResponse } from '../models/server-response';
 
 
 @Injectable({
@@ -9,14 +10,21 @@ import { catchError, retry } from 'rxjs/operators';
 })
 export class ApiService {
   baseApiUrl = '/animus/';
+  baseTestApiUrl = this.baseApiUrl + 'test/';
 
   constructor(private httpClient: HttpClient) { }
 
-  get(url: string, parameters?: Record<string, any>): Observable<any> {
-    console.log('parameters', parameters);
+  get<T extends AnimusBaseServerResponse>(url: string, parameters?: Record<string, any>): Observable<any> {
     const options = this.getApiGetOptions(parameters);
 
-    return this.httpClient.get<any>(this.baseApiUrl + url, options).pipe(
+    return this.httpClient.get<T>(this.baseApiUrl + url, options).pipe(
+      retry(1),
+      catchError(this.processError)
+    );
+  }
+
+  post<T, J extends AnimusBaseServerResponse>(url: string, data: T): Observable<J> {
+    return this.httpClient.post<J>(this.baseApiUrl + url, data, {observe: 'body'}).pipe(
       retry(1),
       catchError(this.processError)
     );

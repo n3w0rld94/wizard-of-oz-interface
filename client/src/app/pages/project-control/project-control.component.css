@@ -24,13 +24,16 @@
 }
 
 .discrete-button:not([disabled]) {
+    transition: all 0.4s ease;
     opacity: 0.5;
     color: rgb(255, 255, 255) !important;
     fill: rgb(255, 255, 255) !important;
+    transform: scale(1);
 }
 
 .discrete-button:not([disabled]):hover {
     opacity: 1;
+    transform: scale(1.5);
 }
 
 .full-screen-button {
@@ -52,29 +55,58 @@
     position: absolute;
 }
 
-.loader {
-    opacity: 0.5;
+.loader_1 {
+    opacity: 0.9;
+    margin: 80px;
     background: rgb(255, 255, 255);
     border-radius: 50%;
     margin: 10px;
     height: 20px;
     width: 20px;
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 1);
-    transform: scale(1.5);
+    transform: scale(1);
     animation: pulse 2s infinite;
+}
+
+.loader_2 {
+    opacity: 0.9;
+    margin: 80px;
+    background: rgb(255, 255, 255);
+    border-radius: 50%;
+    margin: 10px;
+    height: 20px;
+    width: 20px;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    animation: pulse 2s infinite;
+    animation-delay: 0.6s;
+}
+
+.loader_3 {
+    opacity: 0.9;
+    margin: 80px;
+    background: rgb(255, 255, 255);
+    border-radius: 50%;
+    margin: 10px;
+    height: 20px;
+    width: 20px;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    animation: pulse 2s infinite;
+    animation-delay: 1.2s;
 }
 
 @keyframes pulse {
     0% {
-        transform: scale(1.5);
+        transform: scale(1);
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     }
-    70% {
+    50% {
         transform: scale(3);
         box-shadow: 0 0 0 20px rgba(218, 15, 15, 0);
     }
     100% {
-        transform: scale(1.5);
+        transform: scale(1);
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     }
 }

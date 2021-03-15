@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { ControlService } from 'src/app/services/control.service';
@@ -5,7 +6,35 @@ import { ControlService } from 'src/app/services/control.service';
 @Component({
   selector: 'app-project-control',
   templateUrl: './project-control.component.html',
-  styleUrls: ['./project-control.component.css']
+  styleUrls: ['./project-control.component.css'],
+  animations: [
+    trigger(
+      'inAnimation',
+      [
+        transition(
+          ':enter',
+          [
+            style({ opacity: 0 }),
+            animate('0.2s ease-out',
+              style({ opacity: 1 }))
+          ]
+        ),
+      ]
+    ),
+    trigger(
+      'outAnimation',
+      [
+        transition(
+          ':leave',
+          [
+            style({ opacity: 1 }),
+            animate('0.1s ease-in',
+              style({ opacity: 0 }))
+          ]
+        )
+      ]
+    )
+  ]
 })
 export class ProjectControlComponent implements OnInit {
   @Input() robotName = 'Pepper';

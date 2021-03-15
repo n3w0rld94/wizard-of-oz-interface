@@ -89,9 +89,11 @@ def add_header(r):
     r.headers["Cache-Control"] = "public, max-age=0"
     return r
 
+
 @app.errorhandler(404)
 def handle_angular_routes(e):
-	return send_from_directory(app_folder, "index.html")
+    return send_from_directory(app_folder, "index.html")
+
 
 @app.route("/")
 def angular():
@@ -165,40 +167,63 @@ def logout():
 
 @app.route(apiBaseUrl + "start_video_feed")
 def start_video_feed():
-    global video_streamer
-    video_streamer = Video_Reader()
-    video_streamer.capture = True
-    return Response(
-        video_streamer.start_capture(),
-        mimetype="multipart/x-mixed-replace; boundary=frame",
-    )
+    user = get_user_from_cookie()
+
+    if user:
+        generator = user.animus_wrapper.start_video_stream()
+        return Response(
+            generator(),
+            mimetype="multipart/x-mixed-replace; boundary=frame",
+        )
+    else:
+        return
 
 
 @app.route(apiBaseUrl + "stop_video_feed")
 def stop_video_feed():
-    global video_streamer
+    user = get_user_from_cookie()
 
-    if video_streamer:
-        video_streamer.capture = False
+    if user:
+        user.animus_wrapper.stop_video_stream()
 
     resp = get_response(True, "Video Feed Stopped", 1)
-
     return resp
 
 
 @socketio.on("connect")
-def on_connect(data):
+def on_connect():
+    username = request.args.get("username")
     print("received connect for " + request.sid)
-    print("received connect for " + data.username)
-    # user_email_by_session_id.set(request.sid, data.username)
+    print("received connect for " + username)
+    user_email_by_session_id.set(request.sid, username)
     emit("log", "Connected", broadcast=True)
 
 
 @socketio.on("message")
 def on_message_received(msg):
-    print("received message" + msg)
-    # username = user_email_by_session_id.get(request.sid)
-    # user_by_email.get(username)
+    print("received message" + str(msg))
+    username = user_email_by_session_id.get(request.sid)
+
+    if username:
+        user = user_by_email.get(username)
+        if user:
+            user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
+            emit("message", {"message": "OK", "success": True})
+            return
+
+        emit(
+            "message",
+            {"message": "no user found with username: " + username, "success": False},
+        )
+        return
+
+    emit(
+        "message",
+        {
+            "message": "no username found with session id: " + request.sid,
+            "success": False,
+        },
+    )
 
     # if user:
     #     user.animus_wrapper.start_video_stream()

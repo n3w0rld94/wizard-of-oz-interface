@@ -3,7 +3,7 @@
 
 import os
 import sys
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 from woz_utils.video_reader import Video_Reader
 
 
@@ -271,10 +271,17 @@ class Animus_Client:
             list(motorDict.values()),
         )
 
-    def start_video_stream(): 
-        video_streamer = Video_Reader()
+    def start_video_stream(self) -> Generator: 
+        self.video_reader = Video_Reader(self.robot)
 
-        yield video_streamer.start_capture()
+        return self.video_reader.start_capture
+
+    def stop_video_stream(self) -> bool:
+        if self.video_reader:
+            self.video_reader.capture = False
+        
+        return True
+
 
     def demo_motion(self) -> None:
         """ #### Opens a video player showing the robot video feed and moves the head of the robot in 4 random directions and stops. """

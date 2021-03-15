@@ -14,17 +14,67 @@
     margin-bottom: 10px;
 }
 
-.video-feed {
-    width: 100%;
-    height: auto;
-}
-
 .script-menu>::ng-deep .mat-figure {
     align-items: flex-start;
 }
 
-#video-controls.disabled {
+#video-controls:disabled {
     pointer-events: none;
+    opacity: 0.3;
+}
+
+.discrete-button:not([disabled]) {
     opacity: 0.5;
-    /* background: #CCC; */
+    color: rgb(255, 255, 255) !important;
+    fill: rgb(255, 255, 255) !important;
+}
+
+.discrete-button:not([disabled]):hover {
+    opacity: 1;
+}
+
+.full-screen-button {
+    float: right !important;
+    margin-right: 20px !important;
+}
+
+.play-button {
+    font-size: 60px;
+}
+
+.dynamic-size {
+    height: 100% !important;
+    width: auto !important;
+}
+
+.hide-element {
+    visibility: hidden;
+    position: absolute;
+}
+
+.loader {
+    opacity: 0.5;
+    background: rgb(255, 255, 255);
+    border-radius: 50%;
+    margin: 10px;
+    height: 20px;
+    width: 20px;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 1);
+    transform: scale(1.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1.5);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+    70% {
+        transform: scale(3);
+        box-shadow: 0 0 0 20px rgba(218, 15, 15, 0);
+    }
+    100% {
+        transform: scale(1.5);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
 }

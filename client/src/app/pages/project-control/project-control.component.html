@@ -1,17 +1,28 @@
-<mat-grid-list id="full-screen" cols="4" rows="5" rowHeight="2:1">
-    <mat-grid-tile>
-        <div title="Video control bar" [ngClass]="{disabled: !isConnected}" id="video-controls">
-            <button [disabled]="videoSrc" mat-raised-button (click)="onStartVideoStream()">
-                <mat-icon title="start video stream" role="button">live_tv</mat-icon>
-            </button>
-            <button [disabled]="!videoSrc" mat-raised-button (click)="onStopVideoStreaming()">
-                <mat-icon title="stop robot video stream" role="button">tv_off</mat-icon>
-            </button>
-        </div>
-    </mat-grid-tile>
-    <mat-grid-tile id="video-player" [rowspan]=3>
+<mat-grid-list id="full-screen" cols="4" rows="4" rowHeight="11:5">
+    <mat-grid-tile id="video-player" [rowspan]=3 [colspan]=3>
+        <div class="loader" *ngIf="loadingVideo"></div>
 
-        <img class="video-feed" *ngIf="isConnected && videoSrc" [src]="videoSrc">
+        <button *ngIf="isConnected && !videoSrc;" mat-icon-button class="discrete-button play-button"
+            (click)="onStartVideoStream()">
+            <mat-icon [inline]="true" title="Start robot video stream" role="button">live_tv</mat-icon>
+        </button>
+
+        <img id="video-player-inner" [ngClass]="{'hide-element': !isConnected || loadingVideo || !videoSrc}"
+            class="dynamic-size" [src]="videoSrc">
+
+        <mat-grid-tile-footer style="width: 100% !important">
+            <div id="video-controls" title="Video control bar" [ngClass]="{disabled: !isConnected}"
+                style="width: 100% !important">
+                <button *ngIf="videoSrc.length > 1" mat-icon-button class="discrete-button"
+                    (click)="onStopVideoStreaming()">
+                    <mat-icon title="Stop robot video stream" role="button">tv_off</mat-icon>
+                </button>
+                <button title="Enter/Exit fullscreen mode" class="discrete-button full-screen-button" mat-icon-button
+                    (click)="fullScreenVideo()">
+                    <mat-icon>open_in_full</mat-icon>
+                </button>
+            </div>
+        </mat-grid-tile-footer>
     </mat-grid-tile>
     <mat-grid-tile class="script-menu" id="control-panel" [rowspan]=3>
         <mat-tab-group animationDuration="0ms">

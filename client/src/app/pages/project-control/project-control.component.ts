@@ -10,6 +10,8 @@ import { ControlService } from 'src/app/services/control.service';
 export class ProjectControlComponent implements OnInit {
   @Input() robotName = 'Pepper';
   isConnected = false;
+  isVideoFullScreen = false;
+  loadingVideo = false;
   videoSrc = '';
 
   originalVideoSource = '/animus/start_video_feed';
@@ -19,10 +21,23 @@ export class ProjectControlComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  attachOneTimeListener() {
+    const videoPlayer = document.getElementById('video-player-inner') as HTMLElement;
+    const thisRef = this;
+    videoPlayer.addEventListener('load', displayLoader);
+    this.loadingVideo = true;
+
+    function displayLoader() {
+      thisRef.loadingVideo = false;
+      videoPlayer.removeEventListener('load', displayLoader);
+    }
+  }
+
+
   onStartVideoStream() {
-    console.log('called startVideoStream');
-    // this.controlService.startVideoStream();
+    console.log('Starting video stream');
     this.videoSrc = this.originalVideoSource;
+    this.attachOneTimeListener();
   }
 
   onStopVideoStreaming() {
@@ -31,5 +46,18 @@ export class ProjectControlComponent implements OnInit {
       next: (result) => console.log('video stopped, response: ', result),
       error: (err) => console.error('erro stopping video', err)
     });
+  }
+
+  fullScreenVideo() {
+    const localDocument = document as any;
+    const elem = localDocument.getElementById('video-player') as any;
+
+    if (localDocument.webkitFullscreenElement) {
+      localDocument.webkitCancelFullScreen();
+      this.isVideoFullScreen = false;
+    } else {
+      elem.webkitRequestFullScreen();
+      this.isVideoFullScreen = true;
+    }
   }
 }

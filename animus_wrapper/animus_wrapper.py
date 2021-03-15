@@ -4,6 +4,7 @@
 import os
 import sys
 from typing import Generator, List, Tuple
+from woz_utils.proto_converters import convert_animus_response_to_dict, proto_obj_list_to_dict
 from woz_utils.video_reader import Video_Reader
 
 
@@ -74,18 +75,23 @@ class Animus_Client:
 
     def get_robots(
         self, get_local: bool, get_remote: bool, get_system: bool
-    ) -> Tuple[list, List[Animus_Response]]:
+    ) -> Tuple[List, List[Animus_Response]]:
         get_robots_result = animus.get_robots(get_local, get_remote, get_system)
         errors = []
 
         if not get_robots_result.localSearchError.success:
-            errors.append(get_robots_result.localSearchError)
+            dict_error = convert_animus_response_to_dict(get_robots_result.localSearchError)
+            errors.append(dict_error)
+
             log.error(
                 "Local network search failed: "
                 + get_robots_result.localSearchError.description
             )
 
         if not get_robots_result.remoteSearchError.success:
+            dict_error = convert_animus_response_to_dict(get_robots_result.localSearchError)
+            errors.append(dict_error)
+            
             log.error(
                 "Remote search failed: "
                 + get_robots_result.remoteSearchError.description
@@ -93,9 +99,9 @@ class Animus_Client:
 
         if len(get_robots_result.robots) == 0:
             log.info("Animus Client - No Robots found")
-            return []
+            return [], errors
         else:
-            return get_robots_result.robots, errors
+            return proto_obj_list_to_dict(get_robots_result.robots), errors
 
     # Parameter passed should looks like so: available_robots.robots[chosen_index]
     ## TODO: Create Class for robot_details

@@ -4,10 +4,11 @@ import random
 import webbrowser
 from threading import Timer
 import subprocess
-from woz_utils.video_reader import Video_Reader
+from woz_utils.video_reader import Mockup_Video_Reader
 
 from flask import Flask, Response, request, send_from_directory
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import eventlet
 
 eventlet.monkey_patch()
@@ -17,9 +18,11 @@ from werkzeug.routing import BaseConverter
 from models.user_status import Animus_User
 
 apiBaseUrl = "/animus/"
+testApiBaseUrl = apiBaseUrl + "test/"
 app_folder = "./client/dist/wizard-of-oz-interface"
 
 app = Flask(__name__, static_url_path="", static_folder=app_folder)
+CORS(app)
 socketio = SocketIO(app, logger=True, engineio_logger=True)
 user_by_email = {}
 user_email_by_session_id = {}
@@ -61,15 +64,11 @@ def get_user_from_cookie() -> Animus_User:
 
 
 def get_response(success, description, code, payload=None):
-    json_response = json.dumps(
-        {
-            "success": success,
-            "description": description,
-            "code": code,
-            "payload": payload,
-        }
-    )
-
+    dictionary = dict(success=success, description=description, code=code, payload=payload)
+    json_response = json.dumps(dictionary)
+    
+    print("list of robots" + json.dumps(dictionary))
+    
     resp = Response(json_response, content_type="application/json; charset=utf-8")
     resp.headers.add("content-length", len(json_response))
     resp.status_code = 200
@@ -107,7 +106,22 @@ def angular_src(path):
 
 @app.route(apiBaseUrl + "connect")
 def connect():
-    return "Hello World!"
+    user = get_user_from_cookie()
+    if not user:
+        return get_response(False, "User not logged in", -1)
+
+    try:
+        chosen_robot = request.json()
+        if not chosen_robot:
+            return get_response(False, "No robot details were provided", -1)
+
+        # user.animus_wrapper.choose_robot(chosen_robot)
+        print('chosen robot', json.dumps(chosen_robot))
+    except:
+        return get_response(False, "No robot details were provided", -1)    
+
+    success_response = get_response(True, 'Successfully Connected', 1)
+    return success_response
 
 
 @app.route(apiBaseUrl + "robots")
@@ -118,15 +132,19 @@ def get_robots():
         return get_response(False, "User not logged in", -1)
     else:
         robots, errors = user.get_available_robots()
-        return get_response(True, "success", 1, {robots: robots, errors: errors})
+        success = errors.count != 2
+        code = 1 if success else -1
+        description = "Succeeded" if success else "Failed"
+        return get_response(success, description, code, {"robots": robots, "errors": errors})
 
 
 @app.route(apiBaseUrl + "check-authenticated")
 def check_authenticated():
     user = get_user_from_cookie()
-    code = 1 if user != None else -1
+    user_is_authenticated = user != None
+    code = 1 if user_is_authenticated else -1
 
-    resp = get_response(True, "User Authenticated", 1)
+    resp = get_response(user_is_authenticated, "User Authenticated", code)
     return resp
 
 
@@ -168,7 +186,6 @@ def logout():
 @app.route(apiBaseUrl + "start_video_feed")
 def start_video_feed():
     user = get_user_from_cookie()
-
     if user:
         generator = user.animus_wrapper.start_video_stream()
         return Response(
@@ -190,6 +207,27 @@ def stop_video_feed():
     return resp
 
 
+@app.route(testApiBaseUrl + "start_video_feed")
+def start_mockup_video_feed():
+    global video_streamer
+    video_streamer = Mockup_Video_Reader()
+    video_streamer.capture = True
+
+    return Response(
+        video_streamer.start_capture(),
+        mimetype="multipart/x-mixed-replace; boundary=frame",
+    )
+
+
+@app.route(testApiBaseUrl + "stop_video_feed")
+def stop_mockup_video_feed():
+    global video_streamer
+    video_streamer.capture = False
+    resp = get_response(True, "Video Feed Stopped", 1)
+    return resp
+
+
+
 @socketio.on("connect")
 def on_connect():
     username = request.args.get("username")
@@ -199,7 +237,7 @@ def on_connect():
     emit("log", "Connected", broadcast=True)
 
 
-@socketio.on("message")
+@socketio.on("move_robot")
 def on_message_received(msg):
     print("received message" + str(msg))
     username = user_email_by_session_id.get(request.sid)
@@ -208,11 +246,11 @@ def on_message_received(msg):
         user = user_by_email.get(username)
         if user:
             user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
-            emit("message", {"message": "OK", "success": True})
+            emit("move_robot", {"message": "OK", "success": True})
             return
 
         emit(
-            "message",
+            "move_robot",
             {"message": "no user found with username: " + username, "success": False},
         )
         return
@@ -224,9 +262,6 @@ def on_message_received(msg):
             "success": False,
         },
     )
-
-    # if user:
-    #     user.animus_wrapper.start_video_stream()
 
 
 # opens a web browser at the right address
@@ -248,7 +283,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    build_anguar()  # Build the client before serving it
+    # build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

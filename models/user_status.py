@@ -23,4 +23,4 @@ class Animus_User:
         return outcome
 
     def get_available_robots(self):
-        return self.animus_wrapper.get_robots(True, True, True)
+        return self.animus_wrapper.get_robots(True, True, False)

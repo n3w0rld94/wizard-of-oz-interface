@@ -147,3 +147,4 @@ atlassian-ide-plugin.xml
 #
 ## Sonarlint plugin
 #.idea/sonarlint
+**/environments/config.json

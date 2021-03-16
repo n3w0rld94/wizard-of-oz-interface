@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
   async login() {
     const formValue = this.form.getRawValue();
     this.authService.login(formValue.username, formValue.password).subscribe({
-      next: (result: IAnimusResponse) => {
+      next: (result) => {
         if (result.success) {
           this.loginInvalid = false;
           this.toasterService.success(result.description, 'Login succeeded');

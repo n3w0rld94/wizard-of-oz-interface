@@ -147,4 +147,4 @@ atlassian-ide-plugin.xml
 #
 ## Sonarlint plugin
 #.idea/sonarlint
-**/environments/config.json
+client/src/app/services/authentication.service.ts

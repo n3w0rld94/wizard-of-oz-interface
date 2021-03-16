@@ -14,7 +14,7 @@ export class ApiService {
 
   constructor(private httpClient: HttpClient) { }
 
-  get<T extends AnimusBaseServerResponse>(url: string, parameters?: Record<string, any>): Observable<any> {
+  get<T extends AnimusBaseServerResponse>(url: string, parameters?: Record<string, any>): Observable<T> {
     const options = this.getApiGetOptions(parameters);
 
     return this.httpClient.get<T>(this.baseApiUrl + url, options).pipe(
@@ -24,7 +24,9 @@ export class ApiService {
   }
 
   post<T, J extends AnimusBaseServerResponse>(url: string, data: T): Observable<J> {
-    return this.httpClient.post<J>(this.baseApiUrl + url, data, {observe: 'body'}).pipe(
+    return this.httpClient.post<J>(this.baseApiUrl + url, data, {
+      observe: 'body', headers: { 'Content-Type': 'application/json' }
+    }).pipe(
       retry(1),
       catchError(this.processError)
     );

@@ -4,6 +4,7 @@ import random
 import webbrowser
 from threading import Timer
 import subprocess
+from woz_utils.server_user import Server_User
 from woz_utils.video_reader import Mockup_Video_Reader
 
 from flask import Flask, Response, request, send_from_directory
@@ -64,11 +65,11 @@ def get_user_from_cookie() -> Animus_User:
 
 
 def get_response(success, description, code, payload=None):
-    dictionary = dict(success=success, description=description, code=code, payload=payload)
+    dictionary = dict(
+        success=success, description=description, code=code, payload=payload
+    )
     json_response = json.dumps(dictionary)
-    
-    print("list of robots" + json.dumps(dictionary))
-    
+
     resp = Response(json_response, content_type="application/json; charset=utf-8")
     resp.headers.add("content-length", len(json_response))
     resp.status_code = 200
@@ -116,11 +117,11 @@ def connect():
             return get_response(False, "No robot details were provided", -1)
 
         # user.animus_wrapper.choose_robot(chosen_robot)
-        print('chosen robot', json.dumps(chosen_robot))
+        print("chosen robot", json.dumps(chosen_robot))
     except:
-        return get_response(False, "No robot details were provided", -1)    
+        return get_response(False, "No robot details were provided", -1)
 
-    success_response = get_response(True, 'Successfully Connected', 1)
+    success_response = get_response(True, "Successfully Connected", 1)
     return success_response
 
 
@@ -135,7 +136,9 @@ def get_robots():
         success = errors.count != 2
         code = 1 if success else -1
         description = "Succeeded" if success else "Failed"
-        return get_response(success, description, code, {"robots": robots, "errors": errors})
+        return get_response(
+            success, description, code, {"robots": robots, "errors": errors}
+        )
 
 
 @app.route(apiBaseUrl + "check-authenticated")
@@ -144,21 +147,33 @@ def check_authenticated():
     user_is_authenticated = user != None
     code = 1 if user_is_authenticated else -1
 
-    resp = get_response(user_is_authenticated, "User Authenticated", code)
+    response_user = (
+        Server_User(user.username).__dict__ if user_is_authenticated else None
+    )
+
+    resp = get_response(
+        user_is_authenticated, "User Authenticated", code, response_user
+    )
     return resp
 
 
-@app.route(apiBaseUrl + "login")
+@app.route(apiBaseUrl + "login", methods=["POST"])
 def login():
-    username = request.args.get("username")
-    password = request.args.get("password")
+    username = request.json.get("username")
+    password = request.json.get("password")
 
     if not user_by_email.get(username):
         user = Animus_User(username)
         login_outcome = user.login(username, password)
+        response_user = (
+            Server_User(username).__dict__ if login_outcome.success else None
+        )
 
         login_response = get_response(
-            login_outcome.success, login_outcome.description, login_outcome.code
+            login_outcome.success,
+            login_outcome.description,
+            login_outcome.code,
+            response_user,
         )
 
         if login_outcome.success:
@@ -227,7 +242,6 @@ def stop_mockup_video_feed():
     return resp
 
 
-
 @socketio.on("connect")
 def on_connect():
     username = request.args.get("username")
@@ -283,7 +297,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    # build_anguar()  # Build the client before serving it
+    build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

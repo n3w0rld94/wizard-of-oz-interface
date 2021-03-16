@@ -1,7 +1,6 @@
 # author: Ilyasse Fakhreddine
 # date: 03/2021
 
-import json
 import os
 import sys
 from typing import Generator, List, Tuple
@@ -102,67 +101,35 @@ class Animus_Client:
             log.info("Animus Client - No Robots found")
             return [], errors
         else:
-            return get_robots_result.robots, errors
+            return proto_obj_list_to_dict(get_robots_result.robots), errors
 
     # Parameter passed should looks like so: available_robots.robots[chosen_index]
     ## TODO: Create Class for robot_details
-    def choose_robot(self, robot) -> bool:
-        if not robot:
+    def choose_robot(self, robot_details) -> bool:
+        if not robot_details:
             log.warn("No robot selected. please chose a robot and try again.")
-            return {
-            "success": False,
-            "description": "No robot selected.",
-            "code": 1
-        }
+            return False
 
-        try:
-            self.robot = animus.Robot(robot)
-        except Exception as e:
-            logging.error('gotcha for real now! ', exc_info=e)
-            return {
-            "success": False,
-            "description": "chosed robot unsuccessfully",
-            "code": -1
-        }
+        self.robot = animus.Robot(robot_details)
 
-        return {
-            "success": True,
-            "description": "cosed robot successfully",
-            "code": 1
-        }
+        return True
 
-    def connect_to_robot(self) -> Animus_Response:
+    def connect_to_robot(self):
         if not self.is_robot_selected():
-            return {
-                "success": False,
-                "description": 'No robot selected.',
-                'code': -1
-            }
+            return False
 
-        try:
-            robot_name = self.robot.robot_details.name
-            connection_result = self.robot.connect()
+        robot_name = self.robot.robot_details.name
+        connection_result = self.robot.connect()
 
-            print("connection_result")
+        if not connection_result.success:
+            log.warn(
+                f"Could not connect with robot {robot_name}. Reason: "
+                + connection_result.description
+            )
+            return False
 
-            if not connection_result.success:
-                log.warn(
-                    f"Could not connect with robot {robot_name}. Reason: "
-                    + connection_result.description
-                )
-                
-                dict = convert_animus_response_to_dict(connection_result)
-                return dict
-
-            log.info(f"Successfully connected to robot {robot_name}")
-        except Exception as e:
-            print("error connecting wrapper", e)
-        
-        return {
-            "success": True,
-            "description": 'Successfully connected',
-            "code": 1
-        }
+        log.info(f"Successfully connected to robot {robot_name}")
+        return True
 
     def is_robot_selected(self):
         if not self.robot:
@@ -170,8 +137,6 @@ class Animus_Client:
                 "No robot selected. You must select a robot first in order to perform this action."
             )
             return False
-        
-        return True
 
     def open_modality(self, modality_name):
         """#### Opens a modality channel
@@ -194,7 +159,7 @@ class Animus_Client:
             )
             return False
 
-        self.robot.open_modalities[modality_name] = True
+        self.robot.open_modalities.set(modality_name, True)
         log.info(f"Successfully opened {modality_name} modality on {robot_name}")
 
         return True
@@ -274,12 +239,40 @@ class Animus_Client:
 
         return list_of_motions
         
+    def activate_modality(self, robot_mobility, data = None):
+        response = Animus_Response()
+        response.success = True
+        response.code = 0
+        response.description = ""
     
+        if self.is_robot_selected():
+            if not self.open_modality(modality):
+                response.success = False
+                response.code = -1
+                response.description = "modality " + str(modality) + " is not open"
+        else:
+            response.success = False
+            response.code = -2
+            response.description = "robot is not selected"
+            
+        if response.success:    
+            if data == None:
+                response.payload = self.robot.get_modality(robot_mobility, True)
+            else:
+                self.robot.set_modality(robot_mobility, data)
+        
+        return response
+
     def move_robot_body(self, forward_backward: int, left_right: int, rotate: int):
+        """
         if not self.is_robot_selected():
             return False
         if not self.open_modality(Robot_Modality.MOTOR):
             return False
+        """
+        response = is_modality_open(Robot_Modality.MOTOR)
+        if not response.success:
+            return response
 
         forward_backward = forward_backward if forward_backward else 0
         left_right = left_right if left_right else 0
@@ -293,13 +286,19 @@ class Animus_Client:
             Robot_Modality.MOTOR,
             list(motorDict.values()),
         )
-
+        
+        return response
 
     def move_robot_head(self, left_right: int, up_down: int, roll: int):
+        """
         if not self.is_robot_selected():
             return False
         if not self.open_modality(Robot_Modality.MOTOR):
             return False
+        """
+        response = is_modality_open(Robot_Modality.MOTOR)
+        if not response.success:
+            return response
 
         left_right = left_right if left_right else 0
         up_down = up_down if up_down else 0
@@ -313,12 +312,10 @@ class Animus_Client:
             Robot_Modality.MOTOR,
             list(motorDict.values()),
         )
+        
+        return response
 
     def start_video_stream(self) -> Generator: 
-        if not self.is_robot_selected():
-            return False
-        if not self.open_modality("vision"):
-            return False
         self.video_reader = Video_Reader(self.robot)
 
         return self.video_reader.start_capture
@@ -339,9 +336,13 @@ class Animus_Client:
         try:
             cv2.namedWindow("Robot View")
             while next_motion_index < 4:
-                image_list, response = self.robot.get_modality("vision", True)
+                #image_list, response = self.robot.get_modality("vision", True)
+                response = activate_modality("vision")
+                
                 if response.success:
-                    cv2.imshow("RobotView", image_list[0].image)
+                    #cv2.imshow("RobotView", image_list[0].image)
+                    cv2.imshow("RobotView", response.payload.image_list[0].image)
+                    
                     delay = cv2.waitKey(1)
 
                     if delay == 27:
@@ -353,13 +354,18 @@ class Animus_Client:
 
                         if next_motion_index >= len(self.list_of_motions):
                             break
-
+                        """
                         self.robot.set_modality(
                             Robot_Modality.MOTOR,
                             list(self.list_of_motions[next_motion_index].values()),
                         )
-
+                        """
+                        
+                        activate_modality(Robot_Modality.MOTOR, list(self.list_of_motions[next_motion_index].values()))
+                        
+                        
                         next_motion_index += 1
+                        
         except KeyboardInterrupt:
             cv2.destroyAllWindows()
         except SystemExit:

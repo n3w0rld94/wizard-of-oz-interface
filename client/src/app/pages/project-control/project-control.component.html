@@ -36,7 +36,7 @@
                         <b>Control Panel</b>
                     </div>
                     <button (click)="onConnect()" class="mat-raised-button margin-bottom" mat-list-item>
-                        {{isConnected? "Disconnect" : "Connect to " + robot?.name}}
+                        {{isConnected? "Disconnect" : "Connect to " + project?.robot?.name}}
                     </button>
                     <div [@outAnimation] [@inAnimation] *ngIf="isConnected">
                         <button class="mat-raised-button margin-bottom" mat-list-item>

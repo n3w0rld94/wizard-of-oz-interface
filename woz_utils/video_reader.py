@@ -1,7 +1,11 @@
-from models.modalities import Robot_Modality
+import json
 import time
+
 import cv2
 import eventlet
+from models.modalities import Robot_Modality
+
+from woz_utils.proto_converters import convert_animus_response_to_dict
 
 eventlet.monkey_patch()
 
@@ -17,20 +21,27 @@ class Video_Reader:
             yield None
             raise StopIteration
 
-        while self.capture:
-            success, imageList = self.robot.get_modality(Robot_Modality.VISION, True)
-            if success:
-                print("got a frame list, success: " + str(success))
-                for image in imageList:
-                    ret, jpeg = cv2.imencode(".jpg", image.image)
-                    frame = jpeg.tobytes()
-                    yield (
-                        b"--frame\r\n"
-                        b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n"
-                    )
-                    time.sleep(0)
+        try:
+            print("capture", str(self.capture))
+            while self.capture:
+                imageList, response = self.robot.get_modality("vision", True)
+                
+                print("capturing result", json.dumps(convert_animus_response_to_dict(response)))
+                
+                if response.success:
+                    print("got a frame list, success: " + str(response.success))
+                    for image in imageList:
+                        ret, jpeg = cv2.imencode(".jpg", image.image)
+                        frame = jpeg.tobytes()
+                        yield (
+                            b"--frame\r\n"
+                            b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n\r\n"
+                        )
+                        time.sleep(0)
+        except Exception as e:
+            print("error getting video", e)
 
-        self.robot.close_modality(Robot_Modality.VISION)
+        self.robot.close_modality("vision")
         raise StopIteration
 
 

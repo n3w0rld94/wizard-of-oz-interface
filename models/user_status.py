@@ -1,4 +1,6 @@
 from animus_wrapper.animus_wrapper import Animus_Client
+from woz_utils.proto_converters import proto_obj_list_to_dict
+
 from models.i_animus_response import Animus_Response
 
 
@@ -23,4 +25,26 @@ class Animus_User:
         return outcome
 
     def get_available_robots(self):
-        return self.animus_wrapper.get_robots(True, True, False)
+        robots, errors = self.animus_wrapper.get_robots(True, True, False)
+        self.available_robots = robots
+
+        return proto_obj_list_to_dict(robots), errors
+
+    def connect_to_selected_robot(self, robotId):
+        for robot in self.available_robots:
+            if robot.robot_id == robotId:
+                outcome = self.animus_wrapper.choose_robot(robot)
+                if outcome["success"]:
+                    return self.animus_wrapper.connect_to_robot()
+                else:
+                    return outcome
+        
+        return {
+            "success": False,
+            "description": 'Could not find the robot selected',
+            "code": -1
+        }
+
+
+
+

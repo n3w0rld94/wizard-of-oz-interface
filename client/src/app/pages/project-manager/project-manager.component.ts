@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
 import { IProject } from 'src/app/models/i-project';
 import { ProjectDialogComponent } from '../project-dialog/project-dialog.component';
 
@@ -18,7 +19,10 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor(private dialog: MatDialog) { }
+  constructor(
+    private dialog: MatDialog,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.dataSource = new MatTableDataSource([
@@ -38,6 +42,11 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  onOpenProject(project: IProject): void {
+    localStorage.setItem('selectedProject', JSON.stringify(project));
+    this.router.navigateByUrl('/project-control-screen');
   }
 
   openDialog(project: IProject | null): void {

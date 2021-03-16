@@ -1,8 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
-import { AnimusRobot } from 'src/app/models/animus-robot';
+import { Component, OnInit } from '@angular/core';
+import { IProject } from 'src/app/models/i-project';
 import { ApiService } from 'src/app/services/api.service';
-import { ControlService } from 'src/app/services/control.service';
 import { RobotService } from 'src/app/services/robot.service';
 
 @Component({
@@ -39,7 +38,7 @@ import { RobotService } from 'src/app/services/robot.service';
   ]
 })
 export class ProjectControlComponent implements OnInit {
-  @Input() robot: AnimusRobot;
+  project: IProject;
   isConnected = false;
   isVideoFullScreen = false;
   loadingVideo = false;
@@ -53,6 +52,8 @@ export class ProjectControlComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    const project = localStorage.getItem('selectedProject') as any;
+    this.project = project ? JSON.parse(project) : null;
   }
 
   attachOneTimeListener() {
@@ -68,8 +69,8 @@ export class ProjectControlComponent implements OnInit {
   }
 
   onConnect() {
-    if (this.robot) {
-      this.robotService.connect(this.robot).subscribe({
+    if (this.project?.robot) {
+      this.robotService.connect(this.project.robot).subscribe({
         next: (success) => {
           this.isConnected = success;
         }

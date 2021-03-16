@@ -11,7 +11,7 @@
             <ng-container matColumnDef="openProject">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> </th>
                 <td mat-cell *matCellDef="let row">
-                    <button color="primary" mat-raised-button routerLink="/project-control-screen">
+                    <button color="primary" mat-raised-button (click)="onOpenProject(row)">
                         Open
                     </button>
                 </td>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map, take, tap } from 'rxjs/operators';
 import { AnimusBaseServerResponse, AnimusServerResponse } from '../models/server-response';
 import { User } from '../models/user';
 import { ApiService } from './api.service';
@@ -14,7 +15,8 @@ export class AuthenticationService {
 
   constructor(
     private apiService: ApiService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private toasterService: ToastrService
   ) { }
 
   checkAuthenticated(): Observable<boolean> {
@@ -46,6 +48,11 @@ export class AuthenticationService {
 
             this.loaderService.hide();
           }
+        }),
+        catchError((err, caught) => {
+          this.loaderService.hide();
+          this.toasterService.error(err, 'Error');
+          return throwError(err);
         })
       );
   }

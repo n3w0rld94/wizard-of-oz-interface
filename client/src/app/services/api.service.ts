@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { AnimusBaseServerResponse } from '../models/server-response';
 
@@ -13,7 +12,7 @@ export class ApiService {
   baseApiUrl = '/animus/';
   baseTestApiUrl = this.baseApiUrl + 'test/';
 
-  constructor(private httpClient: HttpClient, private toasterService: ToastrService) { }
+  constructor(private httpClient: HttpClient) { }
 
   get<T extends AnimusBaseServerResponse>(url: string, parameters?: Record<string, any>): Observable<T> {
     const options = this.getApiGetOptions(parameters);
@@ -26,10 +25,10 @@ export class ApiService {
 
   post<T, J extends AnimusBaseServerResponse>(url: string, data: T): Observable<J> {
     return this.httpClient.post<J>(this.baseApiUrl + url, data, {
-      observe: 'body', headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }
     }).pipe(
       retry(1),
-      catchError(this.processError)
+      catchError<any, Observable<J>>(this.processError)
     );
   }
 
@@ -61,9 +60,8 @@ export class ApiService {
       title = `Error Code: ${err.status}`;
       message = `Message: ${err.message}`;
     }
-    console.error(message);
-    this.toasterService.error(message);
 
-    return caught;
+    console.error(message);
+    return throwError(message);
   }
 }

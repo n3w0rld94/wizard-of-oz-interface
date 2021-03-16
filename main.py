@@ -1,16 +1,19 @@
 import atexit
+from collections import namedtuple
 import json
 import random
+import subprocess
 import webbrowser
 from threading import Timer
-import subprocess
+from woz_utils.proto_converters import dictToSnakeCaseObject
+
+import eventlet
+from flask import Flask, Response, request, send_from_directory
+from flask_cors import CORS
+from flask_socketio import SocketIO, emit
+
 from woz_utils.server_user import Server_User
 from woz_utils.video_reader import Mockup_Video_Reader
-
-from flask import Flask, Response, request, send_from_directory
-from flask_socketio import SocketIO, emit
-from flask_cors import CORS
-import eventlet
 
 eventlet.monkey_patch()
 
@@ -105,20 +108,26 @@ def angular_src(path):
     return send_from_directory(app_folder, path)
 
 
-@app.route(apiBaseUrl + "connect")
+@app.route(apiBaseUrl + "connect", methods=["POST"])
 def connect():
     user = get_user_from_cookie()
     if not user:
         return get_response(False, "User not logged in", -1)
 
     try:
-        chosen_robot = request.json()
+        chosen_robot = request.json
+        print("connection robot " + json.dumps(chosen_robot))
         if not chosen_robot:
             return get_response(False, "No robot details were provided", -1)
 
-        # user.animus_wrapper.choose_robot(chosen_robot)
-        print("chosen robot", json.dumps(chosen_robot))
-    except:
+        outcome = user.connect_to_selected_robot(chosen_robot['robotId'])
+
+        print("outcome", outcome)
+
+        if not outcome["success"]:
+            return get_response(False, outcome["description"], outcome["code"])
+    except Exception as e:
+        print("error connecting", e)
         return get_response(False, "No robot details were provided", -1)
 
     success_response = get_response(True, "Successfully Connected", 1)
@@ -253,7 +262,7 @@ def on_connect():
 
 @socketio.on("move_robot")
 def on_message_received(msg):
-    print("received message" + str(msg))
+    print("received message" + json.dumps(msg))
     username = user_email_by_session_id.get(request.sid)
 
     if username:
@@ -261,21 +270,22 @@ def on_message_received(msg):
         if user:
             user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
             emit("move_robot", {"message": "OK", "success": True})
-            return
-
+        else:
+            emit(
+                "move_robot",
+                {
+                    "message": "no user found with username: " + username,
+                    "success": False,
+                },
+            )
+    else:
         emit(
             "move_robot",
-            {"message": "no user found with username: " + username, "success": False},
+            {
+                "message": "no username found with session id: " + request.sid,
+                "success": False,
+            },
         )
-        return
-
-    emit(
-        "message",
-        {
-            "message": "no username found with session id: " + request.sid,
-            "success": False,
-        },
-    )
 
 
 # opens a web browser at the right address
@@ -297,7 +307,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    build_anguar()  # Build the client before serving it
+    # build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

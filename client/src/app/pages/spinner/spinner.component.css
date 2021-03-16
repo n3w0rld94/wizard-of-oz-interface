@@ -6,7 +6,7 @@
 .spinner-message {
     font-size: 20px;
     font-weight: bold;
-} 
+}
 
 .spinner>div {
     display: inline-block;
@@ -14,7 +14,8 @@
     height: 64px;
     margin: 8px;
     border-radius: 50%;
-    background: #fff;
+    background: rgb(32, 66, 144);
+    opacity: 0.6;
     animation: spinner 2.4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 

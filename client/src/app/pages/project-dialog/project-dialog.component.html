@@ -1,28 +1,36 @@
-<div mat-dialog-content>
-    <form [formGroup]="form">
-        <mat-form-field>
-            <mat-label>Title</mat-label>
-            <input matInput formControlName="title">
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Description</mat-label>
-            <input matInput formControlName="description">
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Robot</mat-label>
-            <mat-select [disabled]="availableRobots.length == 0" formControlName="robot">
-                <mat-option *ngFor="let robot of availableRobots" [value]="robot">
-                    {{robot?.name}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-divider></mat-divider>
-        <button style="margin-top: 10px;" mat-raised-button (click)="searchRobots()">
-            Search Robots...
-        </button>
-    </form>
-</div>
-<div mat-dialog-actions>
+<h2 mat-dialog-title>New Project</h2>
+<mat-dialog-content>
+    <div style="display: block;">
+        <form [formGroup]="form">
+            <mat-form-field>
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Description</mat-label>
+                <input matInput formControlName="description">
+            </mat-form-field>
+            <button style="margin-top: 10px;" mat-raised-button (click)="searchRobots()">
+                Search Available Robots...
+            </button>
+            <mat-form-field>
+                <mat-label>Robot</mat-label>
+                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robot">
+                    <mat-option *ngFor="let robot of availableRobots" [value]="robot">
+                        {{robot?.name}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+        <ng-container *ngIf="availableRobots.length">
+            <mat-checkbox [labelPosition]="'after'" (change)="showTable = $event.checked">Show as table</mat-checkbox>
+            <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;" *ngIf="showTable" [selectedRobot]="selectedRobot"
+                (selectedRobotEmitter)="form.controls['robot'].patchValue($event)" [robotsList]="availableRobots">
+            </app-robots-table>
+        </ng-container>
+    </div>
+</mat-dialog-content>
+<div mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()">Cancel</button>
     <button [disabled]="this.form.invalid" mat-button [mat-dialog-close]="onClose()" cdkFocusInitial>Save</button>
 </div>

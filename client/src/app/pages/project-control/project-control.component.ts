@@ -1,7 +1,9 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
+import { AnimusRobot } from 'src/app/models/animus-robot';
 import { ApiService } from 'src/app/services/api.service';
 import { ControlService } from 'src/app/services/control.service';
+import { RobotService } from 'src/app/services/robot.service';
 
 @Component({
   selector: 'app-project-control',
@@ -37,7 +39,7 @@ import { ControlService } from 'src/app/services/control.service';
   ]
 })
 export class ProjectControlComponent implements OnInit {
-  @Input() robotName = 'Pepper';
+  @Input() robot: AnimusRobot;
   isConnected = false;
   isVideoFullScreen = false;
   loadingVideo = false;
@@ -45,7 +47,10 @@ export class ProjectControlComponent implements OnInit {
 
   originalVideoSource = '/animus/start_video_feed';
 
-  constructor(private controlService: ControlService, private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private robotService: RobotService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -62,6 +67,17 @@ export class ProjectControlComponent implements OnInit {
     }
   }
 
+  onConnect() {
+    if (this.robot) {
+      this.robotService.connect(this.robot).subscribe({
+        next: (success) => {
+          this.isConnected = success;
+        }
+      });
+    } else {
+      console.error('Connect - Something went wrong');
+    }
+  }
 
   onStartVideoStream() {
     console.log('Starting video stream');

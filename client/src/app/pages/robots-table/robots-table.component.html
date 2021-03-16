@@ -1,0 +1,42 @@
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selectRobot($event.checked, row) : null"
+                [checked]="selection.isSelected(row)" aria-label="Select a robot">
+            </mat-checkbox>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="model">
+        <th mat-header-cell *matHeaderCellDef> Model </th>
+        <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="location">
+        <th mat-header-cell *matHeaderCellDef> Location </th>
+        <td mat-cell *matCellDef="let element">
+            {{
+            element.robotState.location.city + ', ' +
+            element.robotState.location.postal + ', ' +
+            element.robotState.location.region + ', ' +
+            element.robotState.location.country + ', '
+            }}
+        </td>
+    </ng-container>
+    <ng-container matColumnDef="ip">
+        <th mat-header-cell *matHeaderCellDef> IP </th>
+        <td mat-cell *matCellDef="let element">
+            {{ element.robotState.location.ip}}
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)">
+    </tr>
+</table>

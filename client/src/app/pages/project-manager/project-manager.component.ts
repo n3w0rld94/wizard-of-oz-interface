@@ -12,7 +12,7 @@ import { ProjectDialogComponent } from '../project-dialog/project-dialog.compone
   styleUrls: ['./project-manager.component.css']
 })
 export class ProjectManagerComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['openProject', 'name', 'description', 'robot', 'edit'];
+  displayedColumns: string[] = ['openProject', 'title', 'description', 'robot', 'edit'];
   dataSource: MatTableDataSource<any>;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -47,7 +47,6 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
       robot: ''
     };
     const dialogRef = this.dialog.open(ProjectDialogComponent, {
-      width: '250px',
       data
     });
 

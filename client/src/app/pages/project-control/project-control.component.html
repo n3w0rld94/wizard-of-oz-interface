@@ -35,10 +35,10 @@
                     <div style="margin-bottom: 50px;">
                         <b>Control Panel</b>
                     </div>
-                    <button (click)="isConnected=!isConnected" class="mat-raised-button margin-bottom" mat-list-item>
-                        {{isConnected? "Disconnect" : "Connect to " + robotName}}
+                    <button (click)="onConnect()" class="mat-raised-button margin-bottom" mat-list-item>
+                        {{isConnected? "Disconnect" : "Connect to " + robot?.name}}
                     </button>
-                    <ng-container [@outAnimation] [@inAnimation] *ngIf="isConnected">
+                    <div [@outAnimation] [@inAnimation] *ngIf="isConnected">
                         <button class="mat-raised-button margin-bottom" mat-list-item>
                             Activate Gaze Control
                         </button>
@@ -48,7 +48,7 @@
                         <button class="mat-raised-button margin-bottom" mat-list-item>
                             Stop
                         </button>
-                    </ng-container>
+                    </div>
                 </mat-action-list>
             </mat-tab>
             <mat-tab label="Status Panel">

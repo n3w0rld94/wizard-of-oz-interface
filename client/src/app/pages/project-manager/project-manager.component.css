@@ -11,6 +11,7 @@ td, th {
     width: 25%;
 }
 
-mat-card {
-    width: 50%
+.centered-mat-card {
+    width: 50%;
+    margin: auto;
 }

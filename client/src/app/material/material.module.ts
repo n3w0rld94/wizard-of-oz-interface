@@ -15,6 +15,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 const materialModules = [
     MatSidenavModule,
@@ -32,7 +33,8 @@ const materialModules = [
     MatPaginatorModule,
     MatGridListModule,
     MatDialogModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCheckboxModule
 ];
 
 @NgModule({

@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { Observable, ObservableInput, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { AnimusBaseServerResponse } from '../models/server-response';
@@ -12,14 +13,14 @@ export class ApiService {
   baseApiUrl = '/animus/';
   baseTestApiUrl = this.baseApiUrl + 'test/';
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private toasterService: ToastrService) { }
 
   get<T extends AnimusBaseServerResponse>(url: string, parameters?: Record<string, any>): Observable<T> {
     const options = this.getApiGetOptions(parameters);
 
     return this.httpClient.get<T>(this.baseApiUrl + url, options).pipe(
       retry(1),
-      catchError(this.processError)
+      catchError<any, Observable<T>>(this.processError)
     );
   }
 
@@ -49,14 +50,20 @@ export class ApiService {
     return options;
   }
 
-  processError(err: any): ObservableInput<any> {
-    let message = '';
+  processError<T>(err: any, caught: Observable<T>) {
+    let title = 'Unknown Error';
+    let message = 'An unknown error has occurred';
+
     if (err.error instanceof ErrorEvent) {
+      title = 'Internal Error';
       message = err.error.message;
     } else {
-      message = `Error Code: ${err.status}\nMessage: ${err.message}`;
+      title = `Error Code: ${err.status}`;
+      message = `Message: ${err.message}`;
     }
     console.error(message);
-    return throwError(message);
+    this.toasterService.error(message);
+
+    return caught;
   }
 }

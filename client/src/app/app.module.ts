@@ -12,6 +12,10 @@ import { LoginComponent } from './pages/login/login.component';
 import { ProjectControlComponent } from './pages/project-control/project-control.component';
 import { ProjectDialogComponent } from './pages/project-dialog/project-dialog.component';
 import { ProjectManagerComponent } from './pages/project-manager/project-manager.component';
+import { KeyboardJoystickComponent } from './pages/keyboard-joystick/keyboard-joystick.component';
+import { RobotsTableComponent } from './pages/robots-table/robots-table.component';
+import { SpinnerOverlayComponent } from './pages/spinner-overlay/spinner-overlay.component';
+import { SpinnerComponent } from './pages/spinner/spinner.component';
 
 
 @NgModule({
@@ -21,7 +25,11 @@ import { ProjectManagerComponent } from './pages/project-manager/project-manager
     NavigationComponent,
     ProjectManagerComponent,
     ProjectControlComponent,
-    ProjectDialogComponent
+    ProjectDialogComponent,
+    KeyboardJoystickComponent,
+    RobotsTableComponent,
+    SpinnerOverlayComponent,
+    SpinnerComponent
   ],
   imports: [
     HttpClientModule,
@@ -35,6 +43,9 @@ import { ProjectManagerComponent } from './pages/project-manager/project-manager
     ReactiveFormsModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [
+    SpinnerOverlayComponent
+  ]
 })
 export class AppModule { }

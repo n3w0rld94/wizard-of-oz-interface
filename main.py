@@ -1,32 +1,26 @@
 import atexit
-from collections import namedtuple
 import json
 import random
 import subprocess
-import webbrowser
 from threading import Timer
-from woz_utils.server_utils import (
-    get_failure_response,
-    get_failure_response_body,
-    get_missing_user_response,
-    get_success_response,
-    get_success_response_body,
-)
-from woz_utils.proto_converters import dictToSnakeCaseObject
 
 import eventlet
 from flask import Flask, Response, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+from werkzeug.routing import BaseConverter
 
+from models.user_status import Animus_User
 from woz_utils.server_user import Server_User
+from woz_utils.server_utils import (get_failure_response,
+                                    get_failure_response_body,
+                                    get_missing_user_response,
+                                    get_success_response,
+                                    get_success_response_body, open_browser)
 from woz_utils.video_reader import Mockup_Video_Reader
 
 eventlet.monkey_patch()
 
-from werkzeug.routing import BaseConverter
-
-from models.user_status import Animus_User
 
 apiBaseUrl = "/animus/"
 testApiBaseUrl = apiBaseUrl + "test/"
@@ -241,7 +235,7 @@ def stop_mockup_video_feed():
 @socketio.on("connect")
 def on_connect():
     username = request.args.get("username")
-    print(f"Received connect for sid: {{request.sid}}, user: {{username}}")
+    print(f"Received connect for sid: {request.sid}, user: {username}")
     user_email_by_session_id.set(request.sid, username)
     emit("log", "Connected")
 
@@ -261,15 +255,11 @@ def on_message_received(msg):
             else:
                 resp_body = get_failure_response_body("No commands provided")
         else:
-            resp_body = get_failure_response_body(f"User {{username}} not connected")
+            resp_body = get_failure_response_body(f"User {username} not connected")
     else:
-        resp_body = get_failure_response_body(f"No session with id: {{request.sid}}")
+        resp_body = get_failure_response_body(f"No session with id: {request.sid}")
 
     emit("move_robot", resp_body)
-
-# opens a web browser at the right address
-def open_browser(port):
-    webbrowser.open("http://127.0.0.1:" + str(port) + "/")
 
 
 # Clean up any subscription, close any connection open and so on

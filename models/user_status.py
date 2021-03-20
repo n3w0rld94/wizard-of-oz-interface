@@ -1,6 +1,5 @@
 from animus_wrapper.animus_wrapper import Animus_Client
-from woz_utils.proto_converters import (convert_animus_response_to_dict,
-                                        proto_obj_list_to_dict)
+from woz_utils.proto_converters import proto_obj_list_to_dict
 from woz_utils.server_utils import get_failure_response_body
 
 from models.i_animus_response import Animus_Response
@@ -17,11 +16,11 @@ class Animus_User:
         try:
             self.animus_wrapper.dispose_animus()
         except Exception as e:
-            print("Issue while disposing of animus", e)
+            print("Error while disposing Animus", e)
 
     def login(self, username, password) -> Animus_Response:
         outcome = self.animus_wrapper.login(username, password)
-        self.loggedIn = outcome.success
+        self.loggedIn = outcome["success"]
         return outcome
 
     def get_available_robots(self):
@@ -37,10 +36,9 @@ class Animus_User:
         for robot in self.available_robots:
             if robot.robot_id == robot_id:
                 outcome = self.animus_wrapper.choose_robot(robot)
-                return (
-                    self.animus_wrapper.connect_to_robot()
-                    if outcome["success"]
-                    else outcome
-                )
+                if outcome["success"]:
+                    return self.animus_wrapper.connect_to_robot()
+                else:
+                    return outcome
 
         return get_failure_response_body("Could not find the robot selected")

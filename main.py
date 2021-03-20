@@ -5,6 +5,13 @@ import random
 import subprocess
 import webbrowser
 from threading import Timer
+from woz_utils.server_utils import (
+    get_failure_response,
+    get_failure_response_body,
+    get_missing_user_response,
+    get_success_response,
+    get_success_response_body,
+)
 from woz_utils.proto_converters import dictToSnakeCaseObject
 
 import eventlet
@@ -67,25 +74,8 @@ def get_user_from_cookie() -> Animus_User:
     return user
 
 
-def get_response(success, description, code, payload=None):
-    dictionary = dict(
-        success=success, description=description, code=code, payload=payload
-    )
-    json_response = json.dumps(dictionary)
-
-    resp = Response(json_response, content_type="application/json; charset=utf-8")
-    resp.headers.add("content-length", len(json_response))
-    resp.status_code = 200
-
-    return resp
-
-
 @app.after_request
 def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     r.headers["Pragma"] = "no-cache"
     r.headers["Expires"] = "0"
@@ -112,26 +102,19 @@ def angular_src(path):
 def connect():
     user = get_user_from_cookie()
     if not user:
-        return get_response(False, "User not logged in", -1)
+        return get_missing_user_response()
 
+    chosen_robot = request.json
+    robot_id = chosen_robot["robotId"] if chosen_robot else None
     try:
-        chosen_robot = request.json
-        print("connection robot " + json.dumps(chosen_robot))
-        if not chosen_robot:
-            return get_response(False, "No robot details were provided", -1)
-
-        outcome = user.connect_to_selected_robot(chosen_robot['robotId'])
-
-        print("outcome", outcome)
-
+        outcome = user.connect_to_selected_robot(robot_id)
         if not outcome["success"]:
-            return get_response(False, outcome["description"], outcome["code"])
+            return get_failure_response(outcome["description"])
     except Exception as e:
-        print("error connecting", e)
-        return get_response(False, "No robot details were provided", -1)
+        print("connect - Error connecting to robot: ", e)
+        return get_failure_response("No robot details were provided")
 
-    success_response = get_response(True, "Successfully Connected", 1)
-    return success_response
+    return get_success_response("Successfully Connected")
 
 
 @app.route(apiBaseUrl + "robots")
@@ -139,61 +122,49 @@ def get_robots():
     user = get_user_from_cookie()
 
     if not user:
-        return get_response(False, "User not logged in", -1)
+        return get_missing_user_response()
     else:
         robots, errors = user.get_available_robots()
         success = errors.count != 2
-        code = 1 if success else -1
-        description = "Succeeded" if success else "Failed"
-        return get_response(
-            success, description, code, {"robots": robots, "errors": errors}
-        )
+
+        if success:
+            get_success_response("Success", {"robots": robots, "errors": errors})
+        else:
+            get_failure_response("Success", {"robots": robots, "errors": errors})
 
 
 @app.route(apiBaseUrl + "check-authenticated")
 def check_authenticated():
     user = get_user_from_cookie()
-    user_is_authenticated = user != None
-    code = 1 if user_is_authenticated else -1
 
-    response_user = (
-        Server_User(user.username).__dict__ if user_is_authenticated else None
-    )
-
-    resp = get_response(
-        user_is_authenticated, "User Authenticated", code, response_user
-    )
-    return resp
+    if not user:
+        return get_missing_user_response()
+    else:
+        response_user = Server_User(user.username).__dict__
+        return get_success_response("User Authenticated", response_user)
 
 
 @app.route(apiBaseUrl + "login", methods=["POST"])
 def login():
-    username = request.json.get("username")
-    password = request.json.get("password")
+    username = request.json["username"]
+    password = request.json["password"]
 
     if not user_by_email.get(username):
         user = Animus_User(username)
-        login_outcome = user.login(username, password)
-        response_user = (
-            Server_User(username).__dict__ if login_outcome.success else None
-        )
+        outcome = user.login(username, password)
 
-        login_response = get_response(
-            login_outcome.success,
-            login_outcome.description,
-            login_outcome.code,
-            response_user,
-        )
-
-        if login_outcome.success:
-            login_response.set_cookie(
-                "ANM_SDK_SESSION", username, max_age=60 * 60 * 24 * 7
-            )
+        if outcome["success"]:
             user_by_email[username] = user
-
-        return login_response
+            response_user = Server_User(username).__dict__
+            login_response = get_success_response("Logged in", response_user)
+            login_response.set_cookie(
+                "ANM_SDK_SESSION", username, max_age=60 * 60 * 24 * 1
+            )
+            return login_response
+        else:
+            return get_failure_response(outcome["description"])
     else:
-        return get_response(False, "User already logged in", -1)
+        return get_failure_response("User already logged in")
 
 
 @app.route(apiBaseUrl + "logout")
@@ -204,7 +175,24 @@ def logout():
         user.logout()
         user_by_email[user.username] = None
 
-    return get_response(True, "User logged out successfully", 1)
+    return get_success_response("Logged out")
+
+
+@app.route(apiBaseUrl + "say", methods=["POST"])
+def say():
+    user = get_user_from_cookie()
+
+    if not user:
+        return get_missing_user_response()
+    else:
+        message = request.json.get("message")
+        emotion = request.json.get("emotion")
+        outcome = user.animus_wrapper.say(message, emotion)
+
+        if outcome["success"]:
+            return get_success_response("Message spoken")
+        else:
+            return get_failure_response(outcome["description"])
 
 
 @app.route(apiBaseUrl + "start_video_feed")
@@ -217,18 +205,18 @@ def start_video_feed():
             mimetype="multipart/x-mixed-replace; boundary=frame",
         )
     else:
-        return
+        return get_missing_user_response()
 
 
 @app.route(apiBaseUrl + "stop_video_feed")
 def stop_video_feed():
     user = get_user_from_cookie()
 
-    if user:
+    if not user:
+        return get_missing_user_response()
+    else:
         user.animus_wrapper.stop_video_stream()
-
-    resp = get_response(True, "Video Feed Stopped", 1)
-    return resp
+        return get_success_response("Video Feed Stopped")
 
 
 @app.route(testApiBaseUrl + "start_video_feed")
@@ -247,46 +235,37 @@ def start_mockup_video_feed():
 def stop_mockup_video_feed():
     global video_streamer
     video_streamer.capture = False
-    resp = get_response(True, "Video Feed Stopped", 1)
-    return resp
+    return get_success_response("Video feed stopped")
 
 
 @socketio.on("connect")
 def on_connect():
     username = request.args.get("username")
-    print("received connect for " + request.sid)
-    print("received connect for " + username)
+    print(f"Received connect for sid: {{request.sid}}, user: {{username}}")
     user_email_by_session_id.set(request.sid, username)
-    emit("log", "Connected", broadcast=True)
+    emit("log", "Connected")
 
 
 @socketio.on("move_robot")
 def on_message_received(msg):
-    print("received message" + json.dumps(msg))
+    print("Received message" + json.dumps(msg))
     username = user_email_by_session_id.get(request.sid)
+    resp_body = None
 
     if username:
         user = user_by_email.get(username)
         if user:
-            user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
-            emit("move_robot", {"message": "OK", "success": True})
+            if msg:
+                user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
+                resp_body = get_success_response_body("OK")
+            else:
+                resp_body = get_failure_response_body("No commands provided")
         else:
-            emit(
-                "move_robot",
-                {
-                    "message": "no user found with username: " + username,
-                    "success": False,
-                },
-            )
+            resp_body = get_failure_response_body(f"User {{username}} not connected")
     else:
-        emit(
-            "move_robot",
-            {
-                "message": "no username found with session id: " + request.sid,
-                "success": False,
-            },
-        )
+        resp_body = get_failure_response_body(f"No session with id: {{request.sid}}")
 
+    emit("move_robot", resp_body)
 
 # opens a web browser at the right address
 def open_browser(port):
@@ -299,7 +278,7 @@ def clean_up():
     for username, user in user_by_email.items():
         user.logout()
 
-    print("cleaned up!!!")
+    print("Cleaned up!!!")
 
 
 if __name__ == "__main__":

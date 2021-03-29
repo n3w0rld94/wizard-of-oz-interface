@@ -2,6 +2,6 @@
     <mat-card-content>
         <button *ngIf="!$keyboardSubscription" mat-raised-button (click)="initialise_keyboard_controller()">Start Test</button>
         <button *ngIf="$keyboardSubscription" mat-raised-button (click)="stop_keyboard_controller()">Stop Test</button>
-        <input id="input"/>
+        <input type="search" autocomplete="off"  id="input"/>
     </mat-card-content>
 </mat-card>

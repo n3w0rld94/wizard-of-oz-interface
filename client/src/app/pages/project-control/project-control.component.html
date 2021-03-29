@@ -17,8 +17,8 @@
         <mat-grid-tile-footer style="width: 100% !important">
             <div id="video-controls" title="Video control bar" [ngClass]="{disabled: !isConnected}"
                 style="width: 100% !important">
-                <button [@inAnimation] [@outAnimation] *ngIf="videoSrc.length > 1" mat-icon-button class="discrete-button"
-                    (click)="onStopVideoStreaming()">
+                <button [@inAnimation] [@outAnimation] *ngIf="videoSrc.length > 1" mat-icon-button
+                    class="discrete-button" (click)="onStopVideoStreaming()">
                     <mat-icon title="Stop robot video stream" role="button">tv_off</mat-icon>
                 </button>
                 <button title="Enter/Exit fullscreen mode" class="discrete-button full-screen-button" mat-icon-button
@@ -39,6 +39,7 @@
                         {{isConnected? "Disconnect" : "Connect to " + project?.robot?.name}}
                     </button>
                     <div [@outAnimation] [@inAnimation] *ngIf="isConnected">
+                        <app-keyboard-joystick></app-keyboard-joystick>
                         <button class="mat-raised-button margin-bottom" mat-list-item>
                             Activate Gaze Control
                         </button>
@@ -83,7 +84,8 @@
     <mat-grid-tile id="chat" [colspan]=4>
         <mat-form-field style="width: 50%">
             <mat-label>Text/Speech Interface</mat-label>
-            <textarea matInput></textarea>
+            <textarea matInput [(ngModel)]="message"></textarea>
         </mat-form-field>
+        <button mat-raised-button (click)="sendMessage()">Send</button>
     </mat-grid-tile>
 </mat-grid-list>

@@ -25,6 +25,7 @@ def get_response(success, description, code, payload=None):
     resp = Response(json_response, content_type="application/json; charset=utf-8")
     resp.headers.add("content-length", len(json_response))
     resp.status_code = 200
+    return resp
 
 
 def get_failure_response_body(message: str, payload=None):

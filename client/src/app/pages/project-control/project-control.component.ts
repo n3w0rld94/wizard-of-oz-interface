@@ -43,6 +43,7 @@ export class ProjectControlComponent implements OnInit {
   isVideoFullScreen = false;
   loadingVideo = false;
   videoSrc = '';
+  message = '';
 
   originalVideoSource = '/animus/start_video_feed';
 
@@ -105,5 +106,13 @@ export class ProjectControlComponent implements OnInit {
       elem.webkitRequestFullScreen();
       this.isVideoFullScreen = true;
     }
+  }
+
+  sendMessage() {
+    this.robotService.say(this.message || 'Hi Mauro').subscribe({
+      next: (response) => {
+        console.log('success!', response);
+      }
+    });
   }
 }

@@ -122,9 +122,9 @@ def get_robots():
         success = errors.count != 2
 
         if success:
-            get_success_response("Success", {"robots": robots, "errors": errors})
+            return get_success_response("Success", {"robots": robots, "errors": errors})
         else:
-            get_failure_response("Success", {"robots": robots, "errors": errors})
+            return get_failure_response("Failure", {"robots": robots, "errors": errors})
 
 
 @app.route(apiBaseUrl + "check-authenticated")
@@ -236,7 +236,7 @@ def stop_mockup_video_feed():
 def on_connect():
     username = request.args.get("username")
     print(f"Received connect for sid: {request.sid}, user: {username}")
-    user_email_by_session_id.set(request.sid, username)
+    user_email_by_session_id[request.sid] = "ms414@hw.ac.uk"
     emit("log", "Connected")
 
 
@@ -246,18 +246,18 @@ def on_message_received(msg):
     username = user_email_by_session_id.get(request.sid)
     resp_body = None
 
-    if username:
-        user = user_by_email.get(username)
-        if user:
-            if msg:
-                user.animus_wrapper.move_robot_body(msg.forward, msg.left, msg.rotate)
-                resp_body = get_success_response_body("OK")
-            else:
-                resp_body = get_failure_response_body("No commands provided")
-        else:
-            resp_body = get_failure_response_body(f"User {username} not connected")
-    else:
+    if not username:
         resp_body = get_failure_response_body(f"No session with id: {request.sid}")
+
+    user = user_by_email.get(username)
+    if user:
+        if msg:
+            user.animus_wrapper.move_robot_body(msg["forward"], msg["left"], msg["rotate"])
+            resp_body = get_success_response_body("OK")
+        else:
+            resp_body = get_failure_response_body("No commands provided")
+    else:
+        resp_body = get_failure_response_body(f"User {username} not connected")
 
     emit("move_robot", resp_body)
 
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    # build_anguar()  # Build the client before serving it
+    build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

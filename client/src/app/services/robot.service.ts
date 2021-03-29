@@ -25,6 +25,7 @@ export class WoZSocket extends Socket {
   providedIn: 'root'
 })
 export class RobotService {
+  connected = false;
   constructor(
     private apiService: ApiService,
     private toastService: ToastrService,
@@ -82,12 +83,26 @@ export class RobotService {
     const user = this.authenticationService.user.value;
     this.socket.ioSocket.io.opts.query = { username: user?.username };
     this.socket.connect();
+    this.connected = true;
     this.socket.fromEvent('move_robot').subscribe({
       next: (result) => console.log('Received: ', result)
     });
   }
 
   move(forward: any, left: any, rotate: any) {
+    if (!this.connected) {
+      this.connectToControlSocket();
+    }
     this.socket.emit('move_robot', { forward, left, rotate });
+  }
+
+  say(message: string) {
+    const url = 'say';
+    return this.apiService.post<{ message: string }, AnimusBaseServerResponse>(url, { message }).pipe(
+      take(1),
+      tap(response => {
+        console.log('Operation succeeded', response);
+      })
+    );
   }
 }

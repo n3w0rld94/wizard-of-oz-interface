@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { fromEvent, interval, Subscription } from 'rxjs';
-import { map, throttle } from 'rxjs/operators';
+import { fromEvent, interval, of, Subscription } from 'rxjs';
+import { filter, map, switchMap, throttle } from 'rxjs/operators';
 import { RobotService } from 'src/app/services/robot.service';
 
 @Component({
@@ -21,23 +21,30 @@ export class KeyboardJoystickComponent implements OnInit, OnDestroy {
     console.log('Started controller');
     const input = document.getElementById('input') as HTMLElement;
 
-    this.$keyboardSubscription = fromEvent(input, 'onkeydown').pipe(
-      throttle(val => interval(300)),
-      // filter(val => console.log(e.target.value) )
+    this.$keyboardSubscription = fromEvent(input, 'keydown').pipe(
+      filter((val: any) => [37, 38, 39, 40].includes(val.keyCode)),
       map((e: any) => {
-        console.log('Joystick value in map', e.target.value)
-        return e.target.value;
+        console.log('Joystick value in map', e.key);
+        return e.keyCode;
       }),
-      // switchMap(val => of(val))
     ).subscribe({
-      next: showResults,
+      next: this.showResults.bind(this),
       error: (err) => console.error('error in keyboard controller', err)
     });
 
-    function showResults(data: any[]): void {
-      console.log('data from keyboard', data);
-      this.control
-    }
+  }
+
+  showResults(data: number): void {
+    let left = 0;
+    let forward = 0;
+
+    if (data === 37) { left = -1; }
+    else if (data === 39) { left = +1; }
+
+    if (data === 38) { forward = -1; }
+    else if (data === 40) { forward = +1; }
+
+    this.robotService.move(forward, left, 0);
   }
 
   stop_keyboard_controller() {

@@ -24,12 +24,9 @@ class Video_Reader:
         try:
             print("capture", str(self.capture))
             while self.capture:
-                imageList, response = self.robot.get_modality("vision", True)
-                
-                print("capturing result", json.dumps(convert_animus_response_to_dict(response)))
+                imageList, response = self.robot.get_modality("vision", False)
                 
                 if response.success:
-                    print("got a frame list, success: " + str(response.success))
                     for image in imageList:
                         ret, jpeg = cv2.imencode(".jpg", image.image)
                         frame = jpeg.tobytes()

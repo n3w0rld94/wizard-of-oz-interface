@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { IAnimusResponse } from 'src/app/models/i-animus-response';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 
 @Component({
@@ -16,7 +15,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthenticationService,
-    private toasterService: ToastrService
+    private toasterService: ToastrService,
   ) { }
 
   async ngOnInit() {

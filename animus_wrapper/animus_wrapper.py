@@ -35,7 +35,7 @@ class Animus_Client:
     def set_open_modality(self, modality_name, is_open=False):
         if self.robot:
             robot_id = self.robot.robot_id
-            open_modalities = self.open_modalities_by_robot_id[robot_id]
+            open_modalities = self.open_modalities_by_robot_id.get(robot_id)
             self.open_modalities_by_robot_id[robot_id] = (
                 open_modalities if open_modalities else {}
             )
@@ -44,15 +44,15 @@ class Animus_Client:
     def is_modality_open(self, modality_name):
         if self.robot:
             robot_id = self.robot.robot_id
-            open_modalities = self.open_modalities_by_robot_id[robot_id]
-            if open_modalities and open_modalities[modality_name]:
+            open_modalities = self.open_modalities_by_robot_id.get(robot_id)
+            if open_modalities and open_modalities.get(modality_name):
                 return True
 
         return False
 
     def setup(self):
         audio_params = utils.AudioParams(
-            Backends=["notinternal"],
+            Backends=["alsa"],
             SampleRate=16000,
             Channels=1,
             SizeInFrames=True,
@@ -96,7 +96,7 @@ class Animus_Client:
             errors.append(dict_error)
 
             description = get_robots_result.localSearchError.description
-            log.error("Local network search failed: {description}")
+            log.error(f"Local network search failed: {description}")
 
         if not get_robots_result.remoteSearchError.success:
             dict_error = convert_animus_response_to_dict(
@@ -268,14 +268,15 @@ class Animus_Client:
         left_right = left_right if left_right else 0
         rotate = rotate if rotate else 0
         motorDict = utils.get_motor_dict()
-        motorDict["body_forward"] = 10.0 * forward_backward
-        motorDict["body_sideways"] = 10.0 * left_right
+        motorDict["body_forward"] = 1000.0 * forward_backward
+        motorDict["body_sideways"] = 1000.0 * left_right
         motorDict["body_rotate"] = 10.0 * rotate
 
-        self.robot.set_modality(
-            "motor",
-            list(motorDict.values()),
-        )
+        for i in range(10):
+            self.robot.set_modality(
+                "motor",
+                list(motorDict.values()),
+            )
 
     def say(self, message: str, emotion: str):
         if not self.is_robot_selected():
@@ -286,8 +287,10 @@ class Animus_Client:
         robot_name = self.robot.robot_details.name
         message = message or f"Hi, I am {robot_name}, nice to meet you!"
 
+
         try:
-            speech_outcome, payload = self.robot.set_modality("speech", message)
+            print("message", message)
+            speech_outcome = self.robot.set_modality("speech", message)
             if emotion:
                 emotion_outcome, emotion_payload = self.robot.set_modality(
                     "emotion", emotion

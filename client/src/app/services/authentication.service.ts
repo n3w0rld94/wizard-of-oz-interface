@@ -43,11 +43,12 @@ export class AuthenticationService {
         tap(response => {
           if (response.success) {
             const user = response.success ? response.payload : null;
-            this.user.next({...user} as User | null);
+            this.user.next({ ...user } as User | null);
             delete response.payload;
 
-            this.loaderService.hide();
           }
+
+          this.loaderService.hide();
         }),
         catchError((err, caught) => {
           this.loaderService.hide();

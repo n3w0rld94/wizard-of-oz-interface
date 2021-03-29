@@ -2,6 +2,7 @@ import atexit
 import json
 import random
 import subprocess
+from sys import exc_info
 from threading import Timer
 
 import eventlet
@@ -66,6 +67,18 @@ def get_user_from_cookie() -> Animus_User:
     user = None if not username else user_by_email.get(username)
 
     return user
+
+def revoke_user_cookie() -> bool:
+    try:
+        value = request.cookies.get("ANM_SDK_SESSION",None)
+        if value: 
+            request.cookies.pop("ANM_SDK_SESSION")
+    except Exception as e:
+        print("Error logout", exc_info=e)
+        return False
+    
+    print("Logged out successfully")
+    return True
 
 
 @app.after_request

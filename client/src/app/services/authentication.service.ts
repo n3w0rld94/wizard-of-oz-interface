@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, take, tap } from 'rxjs/operators';
 import { AnimusBaseServerResponse, AnimusServerResponse } from '../models/server-response';
 import { User } from '../models/user';
@@ -11,23 +11,36 @@ import { LoaderService } from './loader.service';
     providedIn: 'root'
 })
 export class AuthenticationService {
-    user = new BehaviorSubject<User | null>(null);
+    #user = new BehaviorSubject<User | null | undefined>(undefined);
 
     constructor(
         private apiService: ApiService,
         private loaderService: LoaderService,
         private toasterService: ToastrService
-    ) { }
+    ) {
+        this.pingApi();
+     }
+
+    get user() {
+        return this.#user.asObservable() as Observable<User | null>;
+    }
 
     checkAuthenticated(): Observable<boolean> {
-        const url = 'check-authenticated';
+        if (this.#user.value === undefined) {
+            return this.pingApi();
+        } else {
+            return this.user.pipe(map(user => !!user));
+        }
+    }
 
+    private pingApi() {
+        const url = 'check-authenticated';
         return this.apiService.get<AnimusServerResponse<User>>(url)
             .pipe(
                 take(1),
                 tap(result => {
                     const user = result.success ? result.payload : null;
-                    this.user.next(user as User | null);
+                    this.#user.next(user as User | null);
                 }),
                 map(result => result?.success)
             );
@@ -43,7 +56,7 @@ export class AuthenticationService {
                 tap(response => {
                     if (response.success) {
                         const user = response.success ? response.payload : null;
-                        this.user.next({ ...user } as User | null);
+                        this.#user.next({ ...user } as User | null);
                         delete response.payload;
 
                     }
@@ -68,7 +81,7 @@ export class AuthenticationService {
                 tap(response => {
                     if (response.success) {
                         if (response.success) {
-                            this.user.next(null);
+                            this.#user.next(null);
                             this.toasterService.success('Logged out.');
                         } else {
                             this.toasterService.warning(response.description, 'Unable to logout');

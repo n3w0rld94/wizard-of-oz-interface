@@ -80,12 +80,15 @@ export class RobotService {
   connectToControlSocket() {
     console.log('called connectToControlSocket');
 
-    const user = this.authenticationService.user.value;
-    this.socket.ioSocket.io.opts.query = { username: user?.username };
-    this.socket.connect();
-    this.connected = true;
-    this.socket.fromEvent('move_robot').subscribe({
-      next: (result) => console.log('Received: ', result)
+    this.authenticationService.user.subscribe({
+      next: user => {
+        this.socket.ioSocket.io.opts.query = { username: user?.username };
+        this.socket.connect();
+        this.connected = true;
+        this.socket.fromEvent('move_robot').subscribe({
+          next: (result) => console.log('Received: ', result)
+        });
+      }
     });
   }
 

@@ -41,12 +41,14 @@
                 <td mat-cell *matCellDef="let row; let i = index">
                     <ng-container *ngIf="row.editable">
                         <input placeholder="Select supported robots ..." [readonly]="true"
-                            [id]="'input-supported-robots-' + i" matInput *ngIf="row.editable" type="text" />
-                        <button mat-button (click)="openDialog(row)"> Search Robots</button>
+                            [id]="'input-supported-robots-text-' + i" matInput *ngIf="row.editable" type="text"
+                            [value]="row.supportedRobotsText" />
+                        <input [id]="'input-supported-robots-' + i" matInput hidden="true" [value]="row.supportedRobots" />
+                        <button mat-button (click)="openDialog(row, i)"> Search Robots</button>
                     </ng-container>
 
                     <ng-container *ngIf="!row.editable">
-                        {{row.supportedRobots}}
+                        {{row.supportedRobotsText}}
                     </ng-container>
                 </td>
             </ng-container>
@@ -58,7 +60,7 @@
                     </button>
 
                     <ng-container *ngIf="row.editable;">
-                        <button mat-icon-button (click)="saveProject(row, i)">
+                        <button mat-icon-button (click)="saveProject(row, i, tempRobots)">
                             <mat-icon>save</mat-icon>
                         </button>
                         <button mat-icon-button (click)="makeLineEditable(row)">

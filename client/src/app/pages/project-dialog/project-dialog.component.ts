@@ -7,80 +7,80 @@ import { IProject } from 'src/app/models/i-project';
 import { RobotService } from 'src/app/services/robot.service';
 
 @Component({
-  selector: 'app-project-dialog',
-  templateUrl: './project-dialog.component.html',
-  styleUrls: ['./project-dialog.component.css'],
-  animations: [
-    trigger(
-      'inAnimation',
-      [
-        transition(
-          ':enter',
-          [
-            style({ height: '0%' }),
-            animate('0.2s ease-out',
-              style({ height: '100%' }))
-          ]
+    selector: 'app-project-dialog',
+    templateUrl: './project-dialog.component.html',
+    styleUrls: ['./project-dialog.component.css'],
+    animations: [
+        trigger(
+            'inAnimation',
+            [
+                transition(
+                    ':enter',
+                    [
+                        style({ height: '0%' }),
+                        animate('0.2s ease-out',
+                            style({ height: '100%' }))
+                    ]
+                ),
+            ]
         ),
-      ]
-    ),
-    trigger(
-      'outAnimation',
-      [
-        transition(
-          ':leave',
-          [
-            style({ height: '100%' }),
-            animate('0.2s ease-in',
-              style({ height: '0%' }))
-          ]
+        trigger(
+            'outAnimation',
+            [
+                transition(
+                    ':leave',
+                    [
+                        style({ height: '100%' }),
+                        animate('0.2s ease-in',
+                            style({ height: '0%' }))
+                    ]
+                )
+            ]
         )
-      ]
-    )
-  ]
+    ]
 })
 export class ProjectDialogComponent implements OnInit {
-  form: FormGroup;
-  availableRobots: AnimusRobot[] = [];
-  selectedRobot: AnimusRobot;
-  showTable = false;
+    form: FormGroup;
+    availableRobots: AnimusRobot[] = [{ name: 'Miro' } as AnimusRobot, { name: 'Pepper' } as AnimusRobot];
+    selectedRobot: AnimusRobot;
+    showTable = false;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    public dialogRef: MatDialogRef<ProjectDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public project: IProject,
-    private robotService: RobotService
-  ) { }
+    constructor(
+        private formBuilder: FormBuilder,
+        public dialogRef: MatDialogRef<ProjectDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) public project: IProject,
+        private robotService: RobotService
+    ) { }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  ngOnInit(): void {
-    this.form = this.formBuilder.group({
-      robot: [this.project.supportedRobots],
-    });
-  }
-
-  searchRobots() {
-    this.robotService.getRobots().subscribe({
-      next: (robots => {
-        console.log('robots', robots);
-        this.availableRobots = robots || [];
-      }),
-      error: (err) => {
-        console.error('error retrieving robots', err);
-        this.availableRobots = [];
-      }
-    });
-  }
-
-  onClose(): IProject | null {
-    if (this.form.valid) {
-      const formProject = this.form.getRawValue();
-      return formProject;
-    } else {
-      return null;
+    onCancel(): void {
+        this.dialogRef.close();
     }
-  }
+
+    ngOnInit(): void {
+        this.form = this.formBuilder.group({
+            robots: [this.project.supportedRobots],
+        });
+    }
+
+    searchRobots() {
+        this.robotService.getRobots().subscribe({
+            next: (robots => {
+                console.log('robots', robots);
+                this.availableRobots = robots || [];
+            }),
+            error: (err) => {
+                console.error('error retrieving robots', err);
+                this.availableRobots = [];
+            }
+        });
+    }
+
+    onClose(): IProject | null {
+        if (this.form.valid) {
+            const formProject = this.form.getRawValue();
+            return formProject;
+        } else {
+            return null;
+        }
+    }
 }

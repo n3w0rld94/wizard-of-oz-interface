@@ -4,6 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { AnimusRobot } from 'src/app/models/animus-robot';
 import { IProject } from 'src/app/models/i-project';
 import { ProjectDialogComponent } from '../project-dialog/project-dialog.component';
 
@@ -15,6 +16,7 @@ import { ProjectDialogComponent } from '../project-dialog/project-dialog.compone
 export class ProjectManagerComponent implements OnInit, AfterViewInit {
     displayedColumns: string[] = ['openProject', 'title', 'description', 'robot', 'edit'];
     dataSource: MatTableDataSource<any>;
+    tempRobots: any = {};
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
@@ -25,18 +27,30 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
     ) { }
 
     ngOnInit(): void {
-        this.dataSource = new MatTableDataSource([
+        let dataSource: IProject[] = [
             {
                 title: 'Project 1',
                 description: ' My first project',
-                robot: 'Pepper'
+                supportedRobots: [{ name: 'Pepper' } as AnimusRobot],
+                supportedRobotsText: ''
             },
             {
                 title: 'Project 2',
                 description: ' My second project',
-                robot: 'Miro'
+                supportedRobots: [{ name: 'Miro' } as AnimusRobot],
+                supportedRobotsText: ''
             }
-        ]);
+        ];
+
+        dataSource = dataSource.map(item => {
+            const supportedRobotsText = this.concatRobotText(item.supportedRobots);
+            item.supportedRobotsText = supportedRobotsText;
+
+            return item;
+        });
+
+
+        this.dataSource = new MatTableDataSource(dataSource);
     }
 
     ngAfterViewInit() {
@@ -44,12 +58,22 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
     }
 
+    concatRobotText(robots: { name: string }[]) {
+        let supportedRobotsText = robots.length ? robots[0].name : '';
+
+        for (let i = 1; i < robots.length; i++) {
+            supportedRobotsText += ', ' + robots[i].name;
+        }
+
+        return supportedRobotsText;
+    }
+
     onOpenProject(project: IProject): void {
         localStorage.setItem('selectedProject', JSON.stringify(project));
         this.router.navigateByUrl('/project-control-screen');
     }
 
-    openDialog(project: IProject): void {
+    openDialog(project: IProject, i: number): void {
         const dialogRef = this.dialog.open(ProjectDialogComponent, {
             data: project
         });
@@ -58,8 +82,14 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
             next: result => {
                 console.log('The dialog was closed', result);
 
-                if (result) {
-                    project.supportedRobots = result;
+                if (result && result.robots) {
+                    const supportedRobotsText = this.concatRobotText(result.robots);
+                    (document.getElementById('input-supported-robots-text-' + i) as HTMLInputElement)
+                        .value = supportedRobotsText;
+                    this.tempRobots[i] = {
+                        supportedRobotsText: supportedRobotsText,
+                        supportedRobots: result.robots
+                    };
                 }
             }
         });
@@ -75,6 +105,9 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
     }
 
     makeLineEditable(row: any): void {
+        if (row.editable) {
+            this.tempRobots = {};
+        }
         row.editable = !row.editable;
     }
 
@@ -90,14 +123,14 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
         ];
     }
 
-    saveProject(row: any, i: number) {
+    saveProject(row: any, i: number, tempRobots: any) {
         const title = (document.getElementById('input-title-' + i) as HTMLInputElement).value;
         const description = (document.getElementById('input-description-' + i) as HTMLInputElement).value;
-        const supportedRobots = (document.getElementById('input-supported-robots-' + i) as HTMLInputElement).value;
 
         row.title = title;
         row.description = description;
-        row.supportedRobots = supportedRobots;
+        row.supportedRobots = tempRobots[i]?.supportedRobots || [];
+        row.supportedRobotsText = tempRobots[i]?.supportedRobotsText || '';
         row.editable = false;
     }
 

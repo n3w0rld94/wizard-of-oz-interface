@@ -7,7 +7,7 @@
             </button>
             <mat-form-field>
                 <mat-label>Robot</mat-label>
-                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robot" multiple>
+                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robots" multiple>
                     <mat-option *ngFor="let robot of availableRobots" [value]="robot">
                         {{robot?.name}}
                     </mat-option>

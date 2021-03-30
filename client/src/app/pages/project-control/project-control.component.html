@@ -1,4 +1,12 @@
-<mat-grid-list id="full-screen" cols="4" rows="4" rowHeight="11:5">
+<mat-grid-list id="full-screen" cols="6" rows="4" rowHeight="11:5">
+    <mat-grid-tile id="chat" [rowspan]=3>
+        <mat-form-field>
+            <mat-label>Text/Speech Interface</mat-label>
+            <textarea matInput [(ngModel)]="message"></textarea>
+        </mat-form-field>
+        <button mat-raised-button (click)="sendMessage()">Send</button>
+    </mat-grid-tile>
+    
     <mat-grid-tile id="video-player" [rowspan]=3 [colspan]=3>
         <div [@inAnimation] style="display: flex;" *ngIf="loadingVideo">
             <div class="loader_1"></div>
@@ -36,7 +44,7 @@
                         <b>Control Panel</b>
                     </div>
                     <button (click)="onConnect()" class="mat-raised-button margin-bottom" mat-list-item>
-                        {{isConnected? "Disconnect" : "Connect to " + project?.robot?.name}}
+                        <!-- {{isConnected? "Disconnect" : "Connect to " + project?.robot?.name}} -->
                     </button>
                     <div [@outAnimation] [@inAnimation] *ngIf="isConnected">
                         <app-keyboard-joystick></app-keyboard-joystick>
@@ -81,11 +89,7 @@
         </mat-tab-group>
 
     </mat-grid-tile>
-    <mat-grid-tile id="chat" [colspan]=4>
-        <mat-form-field style="width: 50%">
-            <mat-label>Text/Speech Interface</mat-label>
-            <textarea matInput [(ngModel)]="message"></textarea>
-        </mat-form-field>
-        <button mat-raised-button (click)="sendMessage()">Send</button>
+    <mat-grid-tile [colspan]=4>
+        
     </mat-grid-tile>
 </mat-grid-list>

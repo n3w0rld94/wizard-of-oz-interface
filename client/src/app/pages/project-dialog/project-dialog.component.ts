@@ -58,9 +58,7 @@ export class ProjectDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({
-      title: [this.project.title, Validators.required],
-      description: [this.project.description, Validators.required],
-      robot: [this.project.robot],
+      robot: [this.project.supportedRobots],
     });
   }
 

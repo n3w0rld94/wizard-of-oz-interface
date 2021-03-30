@@ -5,114 +5,117 @@ import { ApiService } from 'src/app/services/api.service';
 import { RobotService } from 'src/app/services/robot.service';
 
 @Component({
-  selector: 'app-project-control',
-  templateUrl: './project-control.component.html',
-  styleUrls: ['./project-control.component.css'],
-  animations: [
-    trigger(
-      'inAnimation',
-      [
-        transition(
-          ':enter',
-          [
-            style({ opacity: 0 }),
-            animate('0.2s ease-out',
-              style({ opacity: 1 }))
-          ]
+    selector: 'app-project-control',
+    templateUrl: './project-control.component.html',
+    styleUrls: ['./project-control.component.css'],
+    animations: [
+        trigger(
+            'inAnimation',
+            [
+                transition(
+                    ':enter',
+                    [
+                        style({ opacity: 0 }),
+                        animate('0.2s ease-out',
+                            style({ opacity: 1 }))
+                    ]
+                ),
+            ]
         ),
-      ]
-    ),
-    trigger(
-      'outAnimation',
-      [
-        transition(
-          ':leave',
-          [
-            style({ opacity: 1 }),
-            animate('0.1s ease-in',
-              style({ opacity: 0 }))
-          ]
+        trigger(
+            'outAnimation',
+            [
+                transition(
+                    ':leave',
+                    [
+                        style({ opacity: 1 }),
+                        animate('0.1s ease-in',
+                            style({ opacity: 0 }))
+                    ]
+                )
+            ]
         )
-      ]
-    )
-  ]
+    ]
 })
 export class ProjectControlComponent implements OnInit {
-  project: IProject;
-  isConnected = false;
-  isVideoFullScreen = false;
-  loadingVideo = false;
-  videoSrc = '';
-  message = '';
+    project: IProject;
+    isConnected = false;
+    isVideoFullScreen = false;
+    loadingVideo = false;
+    videoSrc = '';
+    message = '';
 
-  originalVideoSource = '/animus/start_video_feed';
+    originalVideoSource = '/animus/start_video_feed';
 
-  constructor(
-    private apiService: ApiService,
-    private robotService: RobotService
-  ) { }
+    constructor(
+        private apiService: ApiService,
+        private robotService: RobotService
+    ) { }
 
-  ngOnInit(): void {
-    const project = localStorage.getItem('selectedProject') as any;
-    this.project = project ? JSON.parse(project) : null;
-  }
-
-  attachOneTimeListener() {
-    const videoPlayer = document.getElementById('video-player-inner') as HTMLElement;
-    const thisRef = this;
-    videoPlayer.addEventListener('load', displayLoader);
-    this.loadingVideo = true;
-
-    function displayLoader() {
-      thisRef.loadingVideo = false;
-      videoPlayer.removeEventListener('load', displayLoader);
+    ngOnInit(): void {
+        const project = localStorage.getItem('selectedProject') as any;
+        this.project = project ? JSON.parse(project) : null;
     }
-  }
 
-  onConnect() {
-    if (this.project?.robot) {
-      this.robotService.connect(this.project.robot).subscribe({
-        next: (success) => {
-          this.isConnected = success;
+    attachOneTimeListener() {
+        const videoPlayer = document.getElementById('video-player-inner') as HTMLElement;
+        const thisRef = this;
+        videoPlayer.addEventListener('load', displayLoader);
+        this.loadingVideo = true;
+
+        function displayLoader() {
+            thisRef.loadingVideo = false;
+            videoPlayer.removeEventListener('load', displayLoader);
         }
-      });
-    } else {
-      console.error('Connect - Something went wrong');
     }
-  }
 
-  onStartVideoStream() {
-    console.log('Starting video stream');
-    this.videoSrc = this.originalVideoSource;
-    this.attachOneTimeListener();
-  }
+    onConnect() {
+        /// @ts-ignore
+        if (this.project?.robot) {
+            /// @ts-ignore
 
-  onStopVideoStreaming() {
-    this.videoSrc = '';
-    this.apiService.get('stop_video_feed').subscribe({
-      next: (result) => console.log('video stopped, response: ', result),
-      error: (err) => console.error('erro stopping video', err)
-    });
-  }
-
-  fullScreenVideo() {
-    const localDocument = document as any;
-    const elem = localDocument.getElementById('video-player') as any;
-
-    if (localDocument.webkitFullscreenElement) {
-      localDocument.webkitCancelFullScreen();
-      this.isVideoFullScreen = false;
-    } else {
-      elem.webkitRequestFullScreen();
-      this.isVideoFullScreen = true;
+            this.robotService.connect(this.project.robot).subscribe({
+                next: (success) => {
+                    this.isConnected = success;
+                }
+            });
+        } else {
+            console.error('Connect - Something went wrong');
+        }
     }
-  }
 
-  sendMessage() {
-    this.robotService.say(this.message || 'Hi Mauro').subscribe({
-      next: (response) => {
-        console.log('success!', response);
-      }
-    });
-  }
+    onStartVideoStream() {
+        console.log('Starting video stream');
+        this.videoSrc = this.originalVideoSource;
+        this.attachOneTimeListener();
+    }
+
+    onStopVideoStreaming() {
+        this.videoSrc = '';
+        this.apiService.get('stop_video_feed').subscribe({
+            next: (result) => console.log('video stopped, response: ', result),
+            error: (err) => console.error('erro stopping video', err)
+        });
+    }
+
+    fullScreenVideo() {
+        const localDocument = document as any;
+        const elem = localDocument.getElementById('video-player') as any;
+
+        if (localDocument.webkitFullscreenElement) {
+            localDocument.webkitCancelFullScreen();
+            this.isVideoFullScreen = false;
+        } else {
+            elem.webkitRequestFullScreen();
+            this.isVideoFullScreen = true;
+        }
+    }
+
+    sendMessage() {
+        this.robotService.say(this.message || 'Hi Mauro').subscribe({
+            next: (response) => {
+                console.log('success!', response.description);
+            }
+        });
+    }
 }

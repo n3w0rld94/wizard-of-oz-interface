@@ -2,7 +2,6 @@ import atexit
 import json
 import random
 import subprocess
-from sys import exc_info
 from threading import Timer
 
 import eventlet
@@ -10,6 +9,7 @@ from flask import Flask, Response, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from werkzeug.routing import BaseConverter
+from flask_mongoengine import MongoEngine
 
 from models.user_status import Animus_User
 from woz_utils.server_user import Server_User
@@ -28,8 +28,23 @@ testApiBaseUrl = apiBaseUrl + "test/"
 app_folder = "./client/dist/wizard-of-oz-interface"
 
 app = Flask(__name__, static_url_path="", static_folder=app_folder)
+app.config['MONGODB_SETTINGS'] = {
+    'db': 'woz_db',
+    'host': '127.0.0.1',
+    'port': 27017
+}
 CORS(app)
 socketio = SocketIO(app, logger=True, engineio_logger=True)
+
+# Database initialisation
+db = MongoEngine()
+db.init_app(app)
+
+def get_db_ref():
+    return db
+
+from db_setup import User, Project
+
 user_by_email = {}
 user_email_by_session_id = {}
 video_streamer = None
@@ -184,6 +199,43 @@ def logout():
 
     return get_success_response("Logged out")
 
+@app.route(apiBaseUrl + "save-project", methods=["POST"])
+def save_project():
+    print("***Saving project started ...")
+    user = get_user_from_cookie()
+
+    if user:
+        print("*******User Found, checking body")
+        if request.json:
+            print("*******body Found:", request.json)
+            project = Project(
+                user=user,
+                title=request.json.get('title'),
+                description=request.json('description'),
+                supportedRobots=request.json('supportedRobots')
+            )
+            project.save()
+        else:
+            print("*******no body found")
+            return get_failure_response("No project was provided")
+    else:
+        print("*******no user found")
+        return get_missing_user_response()
+
+    return get_success_response("Project saved")
+
+@app.route(apiBaseUrl + "get-projects")
+def get_projects(projectId=None):
+    user = get_user_from_cookie()
+
+    if user:
+        projects = []
+        if (projectId):
+            projects = Project.objects(username=user, id=projectId).first()
+        else:
+            projects = Project.objects(username=user)
+    
+    return get_success_response("Retreived Projects", projects)
 
 @app.route(apiBaseUrl + "say", methods=["POST"])
 def say():
@@ -289,7 +341,7 @@ if __name__ == "__main__":
     port = 5000 + random.randint(0, 999)
 
     writeClientConfig(port)
-    build_anguar()  # Build the client before serving it
+    # build_anguar()  # Build the client before serving it
     # Don't opens the browser when in debug mode, as url and ports weirdnesses start happening.
     if not debug:
         Timer(0.5, lambda: open_browser(port)).start()

@@ -23,13 +23,12 @@ export class LoginComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-
     this.authService.user.subscribe({
       next: user => {
         this.user = user;
 
         if (user) {
-          this.router.navigateByUrl('project-manager');
+          this.router.navigateByUrl('project-dashboard');
         }
       }
     });

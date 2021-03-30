@@ -2,20 +2,12 @@
 <mat-dialog-content>
     <div style="display: block;">
         <form [formGroup]="form">
-            <mat-form-field>
-                <mat-label>Title</mat-label>
-                <input matInput formControlName="title">
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Description</mat-label>
-                <input matInput formControlName="description">
-            </mat-form-field>
             <button style="margin-top: 10px;" mat-raised-button (click)="searchRobots()">
                 Search Available Robots...
             </button>
             <mat-form-field>
                 <mat-label>Robot</mat-label>
-                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robot">
+                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robot" multiple>
                     <mat-option *ngFor="let robot of availableRobots" [value]="robot">
                         {{robot?.name}}
                     </mat-option>

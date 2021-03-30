@@ -14,7 +14,7 @@ export class RobotsTableComponent implements OnInit, OnChanges {
   @Output() selectedRobotEmitter = new EventEmitter<AnimusRobot | null>();
   displayedColumns = ['select', 'name', 'model', 'location'];
   dataSource = new MatTableDataSource<AnimusRobot>([]);
-  selection = new SelectionModel<AnimusRobot>(false, []);
+  selection = new SelectionModel<AnimusRobot>(true, []);
 
   constructor() { }
 

@@ -1,13 +1,20 @@
 <h2 mat-dialog-title>New Project</h2>
 <mat-dialog-content>
     <div style="display: block;">
-        <form [formGroup]="form">
+        <form [formGroup]="form" style="margin-right: 50px;">
             <button style="margin-top: 10px;" mat-raised-button (click)="searchRobots()">
                 Search Available Robots...
             </button>
             <mat-form-field>
                 <mat-label>Robot</mat-label>
-                <mat-select (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length" formControlName="robots" multiple>
+                <mat-select *ngIf="!config.singleSelection" (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length"
+                    formControlName="robots" multiple>
+                    <mat-option *ngFor="let robot of availableRobots" [value]="robot">
+                        {{robot?.name}}
+                    </mat-option>
+                </mat-select>
+                <mat-select *ngIf="config.singleSelection" (selectionChange)="selectedRobot=$event.value"
+                    [disabled]="!availableRobots.length" formControlName="robots">
                     <mat-option *ngFor="let robot of availableRobots" [value]="robot">
                         {{robot?.name}}
                     </mat-option>
@@ -16,8 +23,9 @@
         </form>
         <ng-container *ngIf="availableRobots.length">
             <mat-checkbox [labelPosition]="'after'" (change)="showTable = $event.checked">Show as table</mat-checkbox>
-            <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;" *ngIf="showTable" [selectedRobot]="selectedRobot"
-                (selectedRobotEmitter)="form.controls['robot'].patchValue($event)" [robotsList]="availableRobots">
+            <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;" *ngIf="showTable"
+                [singleSelection]="config.singleSelection" [selectedRobot]="selectedRobot" (selectedRobotEmitter)="form.controls['robot'].patchValue($event)"
+                [robotsList]="availableRobots">
             </app-robots-table>
         </ng-container>
     </div>

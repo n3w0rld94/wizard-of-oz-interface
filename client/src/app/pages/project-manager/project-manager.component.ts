@@ -75,7 +75,10 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
 
     openDialog(project: IProject, i: number): void {
         const dialogRef = this.dialog.open(ProjectDialogComponent, {
-            data: project
+            data: {
+                project,
+                singleSelection: false
+            }
         });
 
         dialogRef.afterClosed().subscribe({
@@ -87,7 +90,7 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
                     (document.getElementById('input-supported-robots-text-' + i) as HTMLInputElement)
                         .value = supportedRobotsText;
                     this.tempRobots[i] = {
-                        supportedRobotsText: supportedRobotsText,
+                        supportedRobotsText,
                         supportedRobots: result.robots
                     };
                 }

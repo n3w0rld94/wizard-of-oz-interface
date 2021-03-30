@@ -44,12 +44,15 @@ export class ProjectDialogComponent implements OnInit {
     availableRobots: AnimusRobot[] = [{ name: 'Miro' } as AnimusRobot, { name: 'Pepper' } as AnimusRobot];
     selectedRobot: AnimusRobot;
     showTable = false;
+    project: IProject;
 
     constructor(
         private formBuilder: FormBuilder,
+        private robotService: RobotService,
         public dialogRef: MatDialogRef<ProjectDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public project: IProject,
-        private robotService: RobotService
+        @Inject(MAT_DIALOG_DATA) public config: {
+            project: IProject, singleSelection: boolean
+        },
     ) { }
 
     onCancel(): void {
@@ -57,6 +60,7 @@ export class ProjectDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.project = this.config.project;
         this.form = this.formBuilder.group({
             robots: [this.project.supportedRobots],
         });

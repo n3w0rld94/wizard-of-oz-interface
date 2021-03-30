@@ -1,8 +1,11 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { AnimusRobot } from 'src/app/models/animus-robot';
 import { IProject } from 'src/app/models/i-project';
 import { ApiService } from 'src/app/services/api.service';
 import { RobotService } from 'src/app/services/robot.service';
+import { ProjectDialogComponent } from '../project-dialog/project-dialog.component';
 
 @Component({
     selector: 'app-project-control',
@@ -39,6 +42,7 @@ import { RobotService } from 'src/app/services/robot.service';
 })
 export class ProjectControlComponent implements OnInit {
     project: IProject;
+    selectedRobot: AnimusRobot;
     isConnected = false;
     isVideoFullScreen = false;
     loadingVideo = false;
@@ -49,7 +53,8 @@ export class ProjectControlComponent implements OnInit {
 
     constructor(
         private apiService: ApiService,
-        private robotService: RobotService
+        private robotService: RobotService,
+        private dialog: MatDialog,
     ) { }
 
     ngOnInit(): void {
@@ -70,17 +75,24 @@ export class ProjectControlComponent implements OnInit {
     }
 
     onConnect() {
-        /// @ts-ignore
-        if (this.project?.robot) {
-            /// @ts-ignore
-            this.robotService.connect(this.project.robot).subscribe({
-                next: (success) => {
-                    this.isConnected = success;
+        this.openDialog().subscribe({
+            next: result => {
+                console.log('The dialog was closed', result);
+
+                if (result && result.robots) {
+                    this.selectedRobot = result.robots;
+                    if (this.selectedRobot) {
+                        this.robotService.connect(this.selectedRobot).subscribe({
+                            next: (success) => {
+                                this.isConnected = success;
+                            }
+                        });
+                    } else {
+                        console.error('Connect - Something went wrong');
+                    }
                 }
-            });
-        } else {
-            console.error('Connect - Something went wrong');
-        }
+            }
+        });
     }
 
     onStartVideoStream() {
@@ -116,5 +128,16 @@ export class ProjectControlComponent implements OnInit {
                 console.log('success!', response.description);
             }
         });
+    }
+
+    openDialog() {
+        const dialogRef = this.dialog.open(ProjectDialogComponent, {
+            data: {
+                project: this.project,
+                singleSelection: true
+            }
+        });
+
+        return dialogRef.afterClosed();
     }
 }

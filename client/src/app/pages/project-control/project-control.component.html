@@ -1,13 +1,15 @@
-<mat-grid-list id="full-screen" cols="6" rows="4" rowHeight="11:5">
-    <mat-grid-tile id="chat" [rowspan]=3>
-        <mat-form-field>
-            <mat-label>Text/Speech Interface</mat-label>
-            <textarea matInput [(ngModel)]="message"></textarea>
-        </mat-form-field>
-        <button mat-raised-button (click)="sendMessage()">Send</button>
+<mat-grid-list id="full-screen" cols="8" rows="4" rowHeight="3:2">
+    <mat-grid-tile id="chat" [colspan]=2 [rowspan]=3>
+        <div>
+            <mat-form-field>
+                <mat-label>Text/Speech Interface</mat-label>
+                <textarea matInput [(ngModel)]="message"></textarea>
+            </mat-form-field>
+            <button style="display: block;" mat-raised-button (click)="sendMessage()">Send</button>
+        </div>
     </mat-grid-tile>
-    
-    <mat-grid-tile id="video-player" [rowspan]=3 [colspan]=3>
+
+    <mat-grid-tile id="video-player" [rowspan]=3 [colspan]=4>
         <div [@inAnimation] style="display: flex;" *ngIf="loadingVideo">
             <div class="loader_1"></div>
             <div class="loader_2"></div>
@@ -36,60 +38,49 @@
             </div>
         </mat-grid-tile-footer>
     </mat-grid-tile>
-    <mat-grid-tile class="script-menu" id="control-panel" [rowspan]=3>
-        <mat-tab-group animationDuration="0ms">
-            <mat-tab label="Action Panel">
-                <mat-action-list>
-                    <div style="margin-bottom: 50px;">
-                        <b>Control Panel</b>
-                    </div>
-                    <button (click)="onConnect()" class="mat-raised-button margin-bottom" mat-list-item>
-                        <!-- {{isConnected? "Disconnect" : "Connect to " + project?.robot?.name}} -->
-                    </button>
-                    <div [@outAnimation] [@inAnimation] *ngIf="isConnected">
-                        <app-keyboard-joystick></app-keyboard-joystick>
-                        <button class="mat-raised-button margin-bottom" mat-list-item>
-                            Activate Gaze Control
-                        </button>
-                        <button class="mat-raised-button margin-bottom" mat-list-item>
-                            Start Routine
-                        </button>
-                        <button class="mat-raised-button margin-bottom" mat-list-item>
-                            Stop
-                        </button>
-                    </div>
-                </mat-action-list>
-            </mat-tab>
-            <mat-tab label="Status Panel">
-                <mat-list>
-                    <h2>Connection</h2>
-                    <mat-list-item>
-                        <p mat-line> <b>Connection:</b> Stable </p>
-                    </mat-list-item>
+    <mat-grid-tile class="script-menu" id="control-panel" [colspan]=2 [rowspan]=3>
+        <mat-list>
+            <app-keyboard-joystick></app-keyboard-joystick>
+            <h3>Connection</h3>
+            <mat-list-item>
+                <p mat-line> <b>Connection:</b> Stable </p>
+            </mat-list-item>
 
-                    <mat-divider></mat-divider>
-                    <h2>Active Modalities</h2>
+            <mat-divider></mat-divider>
+            <h3>Active Modalities</h3>
 
-                    <mat-list-item style="overflow: hidden;">
-                        <div style="font-size: large;" mat-line>
-                            <mat-icon style=" color: green;">check_circle</mat-icon>
-                            Video
-                        </div>
-                        <div style="font-size: large;" mat-line>
-                            <mat-icon style=" color: green;">check_circle</mat-icon>
-                            Audio Input
-                        </div>
-                        <div style="font-size: large;" mat-line>
-                            <mat-icon style=" color: green;">check_circle</mat-icon>
-                            Motor
-                        </div>
-                    </mat-list-item>
-                </mat-list>
-            </mat-tab>
-        </mat-tab-group>
+            <!-- <mat-list-item style="overflow: hidden;">
+                <div style="font-size: large;" mat-line>
+                    <mat-icon style=" color: green;">check_circle</mat-icon>
+                    Video
+                </div>
+                <div style="font-size: large;" mat-line>
+                    <mat-icon style=" color: green;">check_circle</mat-icon>
+                    Audio Input
+                </div>
+                <div style="font-size: large;" mat-line>
+                    <mat-icon style=" color: green;">check_circle</mat-icon>
+                    Motor
+                </div>
+            </mat-list-item> -->
+        </mat-list>
 
     </mat-grid-tile>
-    <mat-grid-tile [colspan]=4>
-        
+    <mat-grid-tile style="overflow-y: visible; width: 100%;" [colspan]=8>
+        <div style="width: 100%;">
+            <div style="margin-bottom: 20px; width: 100%; text-align: center;">
+                <b>Control Panel</b>
+            </div>
+            <div style="width: 100%; justify-content: center; display: flex;">
+                <button style="justify-self: center; margin-right: 20px;" (click)="onConnect()" class="mat-raised-button margin-bottom">
+                    {{isConnected? "Disconnect" : "Connect to a robot"}}
+                </button>
+                <div [@outAnimation] [@inAnimation] style="display: inline;">
+                    <button class="mat-raised-button margin-right"> Activate Gaze Control</button>
+                    <button class="mat-raised-button margin-right"> Start Routine</button>
+                    <button class="mat-raised-button margin-right"> Stop</button>
+                </div>
+            </div>
+        </div>
     </mat-grid-tile>
 </mat-grid-list>

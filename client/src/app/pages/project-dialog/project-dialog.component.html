@@ -1,9 +1,9 @@
 <h2 mat-dialog-title>Robot Selection</h2>
-<mat-dialog-content>
+<mat-dialog-content style="height: 100%;">
     <div style="display: block;">
-        <form [formGroup]="form" style="margin-right: 50px;">
-            <button style="margin-top: 10px;" mat-raised-button (click)="searchRobots()">
-                Search Available Robots...
+        <form [formGroup]="form">
+            <button style="margin-top: 10px; margin-right: 50px;" mat-raised-button (click)="searchRobots()">
+                <mat-icon style="margin-right: 20px;">search</mat-icon> Refresh list
             </button>
             <mat-form-field>
                 <mat-label>Robot</mat-label>
@@ -22,8 +22,7 @@
             </mat-form-field>
         </form>
         <ng-container *ngIf="availableRobots.length">
-            <mat-checkbox [labelPosition]="'after'" (change)="showTable = $event.checked">Show as table</mat-checkbox>
-            <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;" *ngIf="showTable"
+            <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;"
                 [singleSelection]="config.singleSelection" [selectedRobot]="selectedRobot" (selectedRobotEmitter)="form.controls['robot'].patchValue($event)"
                 [robotsList]="availableRobots">
             </app-robots-table>

@@ -1,17 +1,13 @@
-<mat-grid-list id="full-screen" cols="8" rows="4" rowHeight="3:2">
+<mat-grid-list id="full-screen" cols="8" rows="4" rowHeight="4:3">
     <mat-grid-tile id="chat" [colspan]=2 [rowspan]=3>
-        <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <h3 style="text-align: center;">Chat History</h3>
-            <div id="chat-history">
-            </div>
-            <div style="width: 90%;">
-                <mat-form-field style="width: 90%;">
-                    <mat-label>Text/Speech Interface</mat-label>
-                    <textarea matInput [(ngModel)]="message"></textarea>
-                </mat-form-field>
-            </div>
-            <button style="display: block;" mat-raised-button (click)="sendMessage()">Send</button>
-        </div>
+        <nb-chat title="Chat">
+            <nb-chat-message *ngFor="let msg of messages" [type]="msg.type" [message]="msg.text" [reply]="msg.reply"
+                [sender]="msg.user.name" [date]="msg.date" [quote]="msg.quote">
+            </nb-chat-message>
+
+            <nb-chat-form (send)="sendMessage($event, 'Puppeteer', '', true)">
+            </nb-chat-form>
+        </nb-chat>
     </mat-grid-tile>
 
     <mat-grid-tile id="video-player" [rowspan]=3 [colspan]=4>
@@ -21,7 +17,7 @@
             <div class="loader_3"></div>
         </div>
 
-        <button [@inAnimation] *ngIf="isConnected && !videoSrc;" mat-icon-button class="discrete-button play-button"
+        <button [@inAnimation] *ngIf="isConnectedTest && !videoSrc;" mat-icon-button class="discrete-button play-button"
             (click)="onStartVideoStream()">
             <mat-icon [inline]="true" title="Start robot video stream" role="button">live_tv</mat-icon>
         </button>
@@ -45,29 +41,14 @@
     </mat-grid-tile>
     <mat-grid-tile class="script-menu" id="control-panel" [colspan]=2 [rowspan]=3>
         <mat-list>
-            <app-keyboard-joystick></app-keyboard-joystick>
-            <h3>Connection</h3>
+            <b>Connection</b>
             <mat-list-item>
-                <p mat-line> <b>Connection:</b> Stable </p>
+                <p mat-line><b>Robot:</b> {{selectedRobot?.name}} </p>
+                <p mat-line><b>Connection:</b> Active </p>
             </mat-list-item>
 
             <mat-divider></mat-divider>
-            <h3>Active Modalities</h3>
-
-            <!-- <mat-list-item style="overflow: hidden;">
-                <div style="font-size: large;" mat-line>
-                    <mat-icon style=" color: green;">check_circle</mat-icon>
-                    Video
-                </div>
-                <div style="font-size: large;" mat-line>
-                    <mat-icon style=" color: green;">check_circle</mat-icon>
-                    Audio Input
-                </div>
-                <div style="font-size: large;" mat-line>
-                    <mat-icon style=" color: green;">check_circle</mat-icon>
-                    Motor
-                </div>
-            </mat-list-item> -->
+            <b>Active Modalities</b>
         </mat-list>
 
     </mat-grid-tile>
@@ -85,6 +66,10 @@
                     <button class="mat-raised-button margin-right"> Activate Gaze Control</button>
                     <button class="mat-raised-button margin-right"> Start Routine</button>
                     <button class="mat-raised-button margin-right"> Stop</button>
+                    <div style="display: inline;">
+                        <app-keyboard-joystick></app-keyboard-joystick>
+                    </div>
+
                 </div>
             </div>
         </div>

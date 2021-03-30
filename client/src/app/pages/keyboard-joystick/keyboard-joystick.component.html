@@ -1,7 +1,12 @@
-<mat-card>
-    <mat-card-content>
-        <button *ngIf="!$keyboardSubscription" mat-raised-button (click)="initialise_keyboard_controller()">Start Test</button>
-        <button *ngIf="$keyboardSubscription" mat-raised-button (click)="stop_keyboard_controller()">Stop Test</button>
-        <input type="search" autocomplete="off"  id="input"/>
-    </mat-card-content>
-</mat-card>
+<button *ngIf="!$keyboardSubscription" mat-raised-button (click)="initialise_keyboard_controller()">
+    <mat-icon style="margin-right: 20px;">games</mat-icon> Start
+</button>
+<button *ngIf="$keyboardSubscription" mat-raised-button (click)="stop_keyboard_controller()">
+    <mat-icon style="margin-right: 20px;">games</mat-icon> Stop
+</button>
+<button mat-icon-button style="pointer-events: none; cursor: crosshair;">
+    <mat-icon *ngIf="arrow == 1" style="color: red;">keyboard_arrow_left</mat-icon>
+    <mat-icon *ngIf="arrow == 2" style="color: red;">keyboard_arrow_up</mat-icon>
+    <mat-icon *ngIf="arrow == 3" style="color: red;">keyboard_arrow_right</mat-icon>
+    <mat-icon *ngIf="arrow == 4" style="color: red;">keyboard_arrow_down</mat-icon>
+</button>

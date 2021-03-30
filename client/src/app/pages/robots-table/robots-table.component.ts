@@ -13,7 +13,7 @@ export class RobotsTableComponent implements OnInit, OnChanges {
     @Input() selectedRobot: AnimusRobot;
     @Input() singleSelection: boolean;
     @Output() selectedRobotEmitter = new EventEmitter<AnimusRobot | null>();
-    displayedColumns = ['select', 'name', 'model', 'location'];
+    displayedColumns = ['select', 'name', 'model', 'location', 'ip'];
     dataSource = new MatTableDataSource<AnimusRobot>([]);
     selection = new SelectionModel<AnimusRobot>(true, []);
 
@@ -31,6 +31,7 @@ export class RobotsTableComponent implements OnInit, OnChanges {
     selectRobot(selected: any, robot: AnimusRobot) {
         this.selection.toggle(robot);
         const robotToEmit = selected ? robot : null;
+        debugger;
         this.selectedRobotEmitter.emit(robotToEmit);
     }
 }

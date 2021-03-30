@@ -19,7 +19,12 @@
             <ng-container matColumnDef="title">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Title </th>
                 <td mat-cell *matCellDef="let row; let i = index">
-                    <input placeholder="insert title ..." [id]="'input-title-' + i" matInput type="text" *ngIf="row.editable" [value]="row.title">
+                    <mat-form-field *ngIf="row.editable" style="width: 90%;">
+                        <mat-label>Supported Robots ...</mat-label>
+                        <input [id]="'input-title-' + i" matInput type="text"
+                            *ngIf="row.editable" [value]="row.title">
+                    </mat-form-field>
+
                     <ng-container *ngIf="!row.editable">
                         {{row.title}}
                     </ng-container>
@@ -29,23 +34,25 @@
             <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Description </th>
                 <td mat-cell *matCellDef="let row; let i = index">
-                    <textarea placeholder="insert description ..." [id]="'input-description-' + i" *ngIf="row.editable" matInput [value]="row.description">
-                    </textarea>
+                    <mat-form-field *ngIf="row.editable" style="width: 90%;">
+                        <mat-label>Description</mat-label>
+                        <textarea [rows]=1 [id]="'input-description-' + i" matInput
+                            [value]="row.description"></textarea>
+                    </mat-form-field>
 
                     <ng-container *ngIf="!row.editable">{{row.description}}</ng-container>
                 </td>
             </ng-container>
 
             <ng-container matColumnDef="robot">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Robot </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Supported Robots </th>
                 <td mat-cell *matCellDef="let row; let i = index">
-                    <ng-container *ngIf="row.editable">
-                        <input placeholder="Select supported robots ..." [readonly]="true"
-                            [id]="'input-supported-robots-text-' + i" matInput *ngIf="row.editable" type="text"
+                    <mat-form-field *ngIf="row.editable" style="width: 90%;">
+                        <mat-label>Supported Robots ...</mat-label>
+                        <input class="clickable" aria-label="button" (click)="openDialog(row, i)" [readonly]="true"
+                            [id]="'input-supported-robots-text-' + i" matInput type="text"
                             [value]="row.supportedRobotsText" />
-                        <input [id]="'input-supported-robots-' + i" matInput hidden="true" [value]="row.supportedRobots" />
-                        <button mat-button (click)="openDialog(row, i)"> Search Robots</button>
-                    </ng-container>
+                    </mat-form-field>
 
                     <ng-container *ngIf="!row.editable">
                         {{row.supportedRobotsText}}
@@ -53,20 +60,20 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="edit">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Edit </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> </th>
                 <td mat-cell *matCellDef="let row; let i = index">
                     <button *ngIf="!row.editable" mat-icon-button (click)="makeLineEditable(row)">
                         <mat-icon>mode_edit</mat-icon>
                     </button>
 
-                    <ng-container *ngIf="row.editable;">
-                        <button mat-icon-button (click)="saveProject(row, i, tempRobots)">
-                            <mat-icon>save</mat-icon>
+                    <div style="display: flex;" *ngIf="row.editable;">
+                        <button title="save" aria-label="save changes" mat-icon-button (click)="saveProject(row, i, tempRobots)">
+                            <mat-icon color="primary">save</mat-icon>
                         </button>
-                        <button mat-icon-button (click)="makeLineEditable(row)">
+                        <button title="cancel" aria-label="cancel changes" mat-icon-button color="warn" (click)="makeLineEditable(row)">
                             <mat-icon>cancel</mat-icon>
                         </button>
-                    </ng-container>
+                    </div>
                 </td>
             </ng-container>
 
@@ -81,7 +88,8 @@
 
         <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
     </div>
-    <button aria-label="New project" mat-fab style="float: right; margin-top: 50px;" (click)="newProject()" color="primary">
+    <button aria-label="New project" mat-fab style="float: right; margin-top: 50px;" (click)="newProject()"
+        color="primary">
         <mat-icon>add</mat-icon>
     </button>
 </mat-card>

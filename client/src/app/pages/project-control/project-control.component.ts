@@ -44,10 +44,12 @@ export class ProjectControlComponent implements OnInit {
     project: IProject;
     selectedRobot: AnimusRobot;
     isConnected = false;
+    isConnectedTest = true;
     isVideoFullScreen = false;
     loadingVideo = false;
     videoSrc = '';
     message = '';
+    messages: any[] = [];
 
     originalVideoSource = '/animus/start_video_feed';
 
@@ -122,8 +124,19 @@ export class ProjectControlComponent implements OnInit {
         }
     }
 
-    sendMessage() {
-        this.robotService.say(this.message || 'Hi Mauro').subscribe({
+    sendMessage(event: any, userName: string, avatar: string, reply: boolean) {
+        this.messages.push({
+            text: event.message,
+            date: new Date(),
+            reply,
+            type: 'text',
+            files: [],
+            user: {
+                name: userName
+            },
+        });
+
+        this.robotService.say(event.message || 'Hi there').subscribe({
             next: (response) => {
                 console.log('success!', response.description);
             }

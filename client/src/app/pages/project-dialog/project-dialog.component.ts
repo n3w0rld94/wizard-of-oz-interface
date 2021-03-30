@@ -41,9 +41,12 @@ import { RobotService } from 'src/app/services/robot.service';
 })
 export class ProjectDialogComponent implements OnInit {
     form: FormGroup;
-    availableRobots: AnimusRobot[] = [];
+    availableRobots: AnimusRobot[] = [
+        { name: 'Fluff Ball 1' } as AnimusRobot,
+        { name: 'Fluff Ball 2' } as AnimusRobot,
+        { name: 'Fluff Ball 3' } as AnimusRobot,
+    ];
     selectedRobot: AnimusRobot;
-    showTable = false;
     project: IProject;
 
     constructor(
@@ -63,6 +66,16 @@ export class ProjectDialogComponent implements OnInit {
         this.project = this.config.project;
         this.form = this.formBuilder.group({
             robots: [this.project.supportedRobots],
+        });
+        this.robotService.getRobots().subscribe({
+            next: (robots => {
+                console.log('robots', robots);
+                this.availableRobots = robots || [];
+            }),
+            error: (err) => {
+                console.error('error retrieving robots', err);
+                this.availableRobots = [];
+            }
         });
     }
 

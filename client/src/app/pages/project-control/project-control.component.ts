@@ -73,7 +73,6 @@ export class ProjectControlComponent implements OnInit {
         /// @ts-ignore
         if (this.project?.robot) {
             /// @ts-ignore
-
             this.robotService.connect(this.project.robot).subscribe({
                 next: (success) => {
                     this.isConnected = success;

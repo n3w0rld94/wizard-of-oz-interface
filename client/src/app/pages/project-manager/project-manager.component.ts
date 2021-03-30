@@ -81,7 +81,7 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
     newProject() {
         this.dataSource.data = [
             {
-                title: 'New Project',
+                title: '',
                 description: '',
                 supportedRobots: 'None',
                 editable: true

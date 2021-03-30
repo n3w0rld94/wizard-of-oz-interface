@@ -72,7 +72,8 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
             data: {
                 project,
                 singleSelection: false
-            }
+            },
+            minWidth: 600
         });
 
         dialogRef.afterClosed().subscribe({

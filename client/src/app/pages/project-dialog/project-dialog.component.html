@@ -3,17 +3,17 @@
     <div style="display: block;">
         <form [formGroup]="form">
             <button style="margin-top: 10px; margin-right: 50px;" mat-raised-button (click)="searchRobots()">
-                <mat-icon style="margin-right: 20px;">search</mat-icon> Refresh list
+                <mat-icon style="margin-right: 20px;">refresh</mat-icon> Refresh list
             </button>
             <mat-form-field>
                 <mat-label>Robot</mat-label>
-                <mat-select *ngIf="!config.singleSelection" (selectionChange)="selectedRobot=$event.value" [disabled]="!availableRobots.length"
+                <mat-select *ngIf="!config.singleSelection" (selectionChange)="selectedRobots=$event.value" [disabled]="!availableRobots.length"
                     formControlName="robots" multiple>
                     <mat-option *ngFor="let robot of availableRobots" [value]="robot">
                         {{robot?.name}}
                     </mat-option>
                 </mat-select>
-                <mat-select *ngIf="config.singleSelection" (selectionChange)="selectedRobot=$event.value"
+                <mat-select *ngIf="config.singleSelection" (selectionChange)="selectedRobots=$event.value"
                     [disabled]="!availableRobots.length" formControlName="robots">
                     <mat-option *ngFor="let robot of availableRobots" [value]="robot">
                         {{robot?.name}}
@@ -23,7 +23,7 @@
         </form>
         <ng-container *ngIf="availableRobots.length">
             <app-robots-table [@inAnimation] [@outAnimation] style="width: 100%;"
-                [singleSelection]="config.singleSelection" [selectedRobot]="selectedRobot" (selectedRobotEmitter)="form.controls['robot'].patchValue($event)"
+                [singleSelection]="config.singleSelection" [selectedRobots]="selectedRobots" (selectedRobotEmitter)="form.controls['robots'].patchValue($event)"
                 [robotsList]="availableRobots">
             </app-robots-table>
         </ng-container>

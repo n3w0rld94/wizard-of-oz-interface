@@ -10,28 +10,34 @@ import { AnimusRobot } from 'src/app/models/animus-robot';
 })
 export class RobotsTableComponent implements OnInit, OnChanges {
     @Input() robotsList: AnimusRobot[] = [];
-    @Input() selectedRobot: AnimusRobot;
+    @Input() selectedRobots: AnimusRobot[];
     @Input() singleSelection: boolean;
-    @Output() selectedRobotEmitter = new EventEmitter<AnimusRobot | null>();
+    @Output() selectedRobotEmitter = new EventEmitter<AnimusRobot[] | null>();
     displayedColumns = ['select', 'name', 'model', 'location', 'ip'];
     dataSource = new MatTableDataSource<AnimusRobot>([]);
-    selection = new SelectionModel<AnimusRobot>(true, []);
+    selection: SelectionModel<AnimusRobot>;
 
     constructor() { }
 
     ngOnInit(): void {
         this.dataSource.data = this.robotsList;
-        this.selection = new SelectionModel<AnimusRobot>(!!this.singleSelection, []);
     }
 
     ngOnChanges() {
-        this.selection.toggle(this.selectedRobot);
+        if (!this.selection) {
+            this.selection = new SelectionModel<AnimusRobot>(!this.singleSelection, []);
+        }
+
+        if (this.selectedRobots) {
+            for (const robot of this.selectedRobots) {
+                this.selection.toggle(robot);
+            }
+        }
     }
 
-    selectRobot(selected: any, robot: AnimusRobot) {
+    selectRobot(robot: AnimusRobot) {
         this.selection.toggle(robot);
-        const robotToEmit = selected ? robot : null;
-        debugger;
-        this.selectedRobotEmitter.emit(robotToEmit);
+
+        this.selectedRobotEmitter.emit(this.selection.selected);
     }
 }

@@ -2,7 +2,7 @@
     <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selectRobot($event.checked, row) : null"
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selectRobot(row) : null"
                 [checked]="selection.isSelected(row)" aria-label="Select a robot">
             </mat-checkbox>
         </td>
@@ -27,7 +27,7 @@
             element.robotState?.location?.region + ', ' +
             element.robotState?.location?.country + ', '
             }}
-            Edinburgh
+            <!-- Edinburgh -->
         </td>
     </ng-container>
     <ng-container matColumnDef="ip">

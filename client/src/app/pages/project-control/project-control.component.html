@@ -17,7 +17,7 @@
             <div class="loader_3"></div>
         </div>
 
-        <button [@inAnimation] *ngIf="isConnectedTest && !videoSrc;" mat-icon-button class="discrete-button play-button"
+        <button [@inAnimation] *ngIf="isConnected && !videoSrc;" mat-icon-button class="discrete-button play-button"
             (click)="onStartVideoStream()">
             <mat-icon [inline]="true" title="Start robot video stream" role="button">live_tv</mat-icon>
         </button>
@@ -40,16 +40,21 @@
         </mat-grid-tile-footer>
     </mat-grid-tile>
     <mat-grid-tile class="script-menu" id="control-panel" [colspan]=2 [rowspan]=3>
-        <mat-list>
-            <b>Connection</b>
-            <mat-list-item>
-                <p mat-line><b>Robot:</b> {{selectedRobot?.name}} </p>
-                <p mat-line><b>Connection:</b> Active </p>
-            </mat-list-item>
+        <div>
+            <h3>Status Panel</h3>
+            <p><b>Robot:</b> {{selectedRobot?.name || "No robot selected."}} </p>
+            <p><b>Status:</b> {{selectedRobot ? "Connected" : "Inactive"}} </p>
 
             <mat-divider></mat-divider>
-            <b>Active Modalities</b>
-        </mat-list>
+            <b>Modalities</b>
+            <ng-container *ngIf="selectedRobot">
+                <p style="padding-left: 20px;"><b>- Video:</b> Ready. </p>
+                <p style="padding-left: 20px;"><b>- Audio:</b> Ready. </p>
+            </ng-container>
+            <ng-container *ngIf="!selectedRobot">
+                No available modalities.
+            </ng-container>
+        </div>
 
     </mat-grid-tile>
     <mat-grid-tile style="overflow-y: visible; width: 100%;" [colspan]=8>
@@ -58,14 +63,14 @@
                 <b>Control Panel</b>
             </div>
             <div style="width: 100%; justify-content: center; display: flex;">
-                <button style="justify-self: center; margin-right: 20px;" (click)="onConnect()"
-                    class="mat-raised-button margin-bottom">
+                <button style="justify-self: center; margin-right: 20px; font-size: 20px;" (click)="onConnect()"
+                    mat-raised-button class="margin-bottom" color="primary" size="large">
                     {{isConnected? "Disconnect" : "Connect to a robot"}}
                 </button>
-                <div [@outAnimation] [@inAnimation] style="display: inline;">
-                    <button class="mat-raised-button margin-right"> Activate Gaze Control</button>
-                    <button class="mat-raised-button margin-right"> Start Routine</button>
-                    <button class="mat-raised-button margin-right"> Stop</button>
+                <div [@outAnimation] [@inAnimation] style="display: inline;" *ngIf="selectedRobot">
+                    <button mat-raised-button class="margin-right"> Activate Gaze Control</button>
+                    <button mat-raised-button class="margin-right"> Start Routine</button>
+                    <button mat-raised-button class="margin-right"> Stop</button>
                     <div style="display: inline;">
                         <app-keyboard-joystick></app-keyboard-joystick>
                     </div>

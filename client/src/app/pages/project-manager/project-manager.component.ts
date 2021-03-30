@@ -33,12 +33,6 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
                 description: ' My first project',
                 supportedRobots: [{ name: 'Pepper' } as AnimusRobot],
                 supportedRobotsText: ''
-            },
-            {
-                title: 'Project 2',
-                description: ' My second project',
-                supportedRobots: [{ name: 'Miro' } as AnimusRobot],
-                supportedRobotsText: ''
             }
         ];
 
@@ -119,7 +113,8 @@ export class ProjectManagerComponent implements OnInit, AfterViewInit {
             {
                 title: '',
                 description: '',
-                supportedRobots: 'None',
+                supportedRobots: [],
+                supportedRobotsText: '',
                 editable: true
             },
             ...this.dataSource.data

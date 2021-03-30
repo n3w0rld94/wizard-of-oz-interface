@@ -41,7 +41,7 @@ import { RobotService } from 'src/app/services/robot.service';
 })
 export class ProjectDialogComponent implements OnInit {
     form: FormGroup;
-    availableRobots: AnimusRobot[] = [{ name: 'Miro' } as AnimusRobot, { name: 'Pepper' } as AnimusRobot];
+    availableRobots: AnimusRobot[] = [];
     selectedRobot: AnimusRobot;
     showTable = false;
     project: IProject;

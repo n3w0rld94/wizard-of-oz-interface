@@ -43,8 +43,6 @@ db.init_app(app)
 def get_db_ref():
     return db
 
-from db_setup import User, Project
-
 user_by_email = {}
 user_email_by_session_id = {}
 video_streamer = None
@@ -335,6 +333,18 @@ def clean_up():
 
     print("Cleaned up!!!")
 
+
+class User(db.Document):
+    username = db.StringField()
+
+    def to_json(self):
+        return {"name": self.name,
+                "email": self.email}
+
+class Project(db.Document):
+    title = db.StringField(max_length=50)
+    description = db.StringField()
+    supportedRobots = db.ListField(db.StringField(max_length=50))
 
 if __name__ == "__main__":
     debug = False

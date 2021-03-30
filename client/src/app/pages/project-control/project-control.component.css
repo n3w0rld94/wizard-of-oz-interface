@@ -10,6 +10,12 @@
     background: lightgray;
 }
 
+#chat-history {
+    height: 100px;
+    width: 90%;
+    border: 1px solid black;
+}
+
 .margin-bottom {
     margin-bottom: 10px;
 }

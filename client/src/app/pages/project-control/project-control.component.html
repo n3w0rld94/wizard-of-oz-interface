@@ -1,10 +1,15 @@
 <mat-grid-list id="full-screen" cols="8" rows="4" rowHeight="3:2">
     <mat-grid-tile id="chat" [colspan]=2 [rowspan]=3>
-        <div>
-            <mat-form-field>
-                <mat-label>Text/Speech Interface</mat-label>
-                <textarea matInput [(ngModel)]="message"></textarea>
-            </mat-form-field>
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <h3 style="text-align: center;">Chat History</h3>
+            <div id="chat-history">
+            </div>
+            <div style="width: 90%;">
+                <mat-form-field style="width: 90%;">
+                    <mat-label>Text/Speech Interface</mat-label>
+                    <textarea matInput [(ngModel)]="message"></textarea>
+                </mat-form-field>
+            </div>
             <button style="display: block;" mat-raised-button (click)="sendMessage()">Send</button>
         </div>
     </mat-grid-tile>
@@ -72,7 +77,8 @@
                 <b>Control Panel</b>
             </div>
             <div style="width: 100%; justify-content: center; display: flex;">
-                <button style="justify-self: center; margin-right: 20px;" (click)="onConnect()" class="mat-raised-button margin-bottom">
+                <button style="justify-self: center; margin-right: 20px;" (click)="onConnect()"
+                    class="mat-raised-button margin-bottom">
                     {{isConnected? "Disconnect" : "Connect to a robot"}}
                 </button>
                 <div [@outAnimation] [@inAnimation] style="display: inline;">
